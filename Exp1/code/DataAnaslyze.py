@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def check(column_name):
     values_counts = df[column_name].value_counts()
     print(values_counts)
@@ -37,15 +38,42 @@ def plot_bar(columnName):
     plt.xticks([])
     # plt.xlim([0,100])
     plt.ylabel('Frequency')
-    plt.savefig('../pic/'+columnName+'_Bar.png')
+    plt.savefig('../pic/' + columnName + '_Bar.png')
     plt.show()
 
 
-train_data_path = '../data/train.csv'
+def check_relation(column1, column2):
+    correlation = column1.corr(column2)
+    print(correlation)
+
+def check_correlation_matrix():
+    correlation_matrix = df.corr().abs()
+
+    correlation_matrix_absolute = correlation_matrix.abs()
+
+    # 获取上三角矩阵，忽略对角线
+    upper_tri = np.triu(np.ones(correlation_matrix_absolute.shape))
+
+    # 从上三角矩阵中筛选出所有大于等于0.7并且小于1的元素的位置
+    to_select = (correlation_matrix_absolute >= 0.7) & (correlation_matrix_absolute < 1) & upper_tri
+
+    # 获取满足条件的行名与列名的组合
+    selected_correlations = correlation_matrix_absolute.where(to_select).stack()
+
+    print("Selected Column Pairs with Correlation >= 0.7 and < 1 and Their Correlations:")
+    for (pair, correlation) in selected_correlations.items():
+        print(f"{pair}: {correlation}")
+
+train_data_path = '../process/Processed_TrainData.csv'
 df = pd.read_csv(train_data_path)
 columns = df.columns.tolist()
 # check('early_return_amount_3mon')
 # checknull(columns)
-plot_bar('interest')
-
-
+# plot_bar('interest')
+check_relation(df['early_return_amount'], df['early_return_amount_3mon'])
+check_relation(df['f3'],df['f4'])
+# correlation_matrix = df.corr()
+# correlation_matrix = correlation_matrix.abs()
+# print(correlation_matrix)
+# correlation_matrix.to_excel('../data/相关系数矩阵.xlsx', sheet_name='Correlation Matrix')
+check_correlation_matrix()
