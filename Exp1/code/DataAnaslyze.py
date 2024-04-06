@@ -29,9 +29,15 @@ def checknull(columns):
 
 
 def plot_bar(columnName):
-    df[columnName].value_counts().sort_index().plot(kind='bar')
+    print(df[columnName].value_counts().sort_index())
+    plt.figure(figsize=(10, 6))  # 设置图像大小
+    value_counts = df[columnName].value_counts().sort_index()
+    value_counts.plot(kind='bar')
     plt.xlabel('values')
+    plt.xticks([])
+    # plt.xlim([0,100])
     plt.ylabel('Frequency')
+    plt.savefig('../pic/'+columnName+'_Bar.png')
     plt.show()
 
 
@@ -40,6 +46,6 @@ df = pd.read_csv(train_data_path)
 columns = df.columns.tolist()
 # check('early_return_amount_3mon')
 # checknull(columns)
-plot_bar('region')
+plot_bar('interest')
 
 
