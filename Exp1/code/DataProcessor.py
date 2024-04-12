@@ -67,33 +67,23 @@ class DataProcessor:
     def __dealDataSegment(self, column_name):
         # print(column_name)
         column = self.data[column_name]
+        if column.dtype == 'region':
+            return column
         if column_name in self.Segment:
             column = pd.cut(column, bins=self.Segment[column_name], labels=range(len(self.Segment[column_name]) - 1),
                             include_lowest=True)
             return column
         length = len(column.value_counts().index)
-        if 100 < length <= 1500:
-            num = 1 + int(np.log2(len(column)))
+        if 50 <= length <= 2500:
+            num = 1 + int(np.log2(length))
             bins = np.linspace(column.min(), column.max(), num + 1)
             column = pd.cut(column, bins=bins, labels=range(num),
                             include_lowest=True)
             self.Segment[column_name] = bins
             return column
-        elif 1500 < length <= 5000 or column_name == 'recircle_b' or column_name == 'debt_loan_ratio':
-            num = int(2 * (len(column) ** (1 / 3)))
+        elif 2500 < length <= len(column):
+            num = 2*int(length ** (1 / 3))
             # print(num)
-            bins = np.linspace(column.min(), column.max(), num + 1)
-            column = pd.cut(column, bins=bins, labels=range(num),
-                            include_lowest=True)
-            self.Segment[column_name] = bins
-            return column
-        elif 5000 < length <= len(column):
-            Q1, Q3 = np.percentile(column, [25, 75])
-            IQR = Q3 - Q1
-            # 计算分段宽度
-            bin_width = 2 * IQR * (len(column) ** (-1 / 3))
-            data_range = np.max(column) - np.min(column)
-            num = int(np.round(data_range / bin_width))
             bins = np.linspace(column.min(), column.max(), num + 1)
             column = pd.cut(column, bins=bins, labels=range(num),
                             include_lowest=True)
@@ -123,8 +113,9 @@ class DataProcessor:
         self.data = self.data.drop(['user_id'], axis=1)
         self.data = self.data.drop(['policy_code'], axis=1)
         # interest 与 class的强相关
-        # self.data = self.data.drop(['interest'], axis=1)
+        self.data = self.data.drop(['interest'], axis=1)
         self.data = self.data.drop(['f4'], axis=1)
+        self.data = self.data.drop(['early_return_amount'],axis=1)
 
         # 默认均采用众数来填充所有缺失值
         for columnName in self.data.columns:
@@ -170,8 +161,9 @@ class DataProcessor:
         df = df.drop(['loan_id'], axis=1)
         df = df.drop(['user_id'], axis=1)
         df = df.drop(['policy_code'], axis=1)
-        # df = df.drop(['interest'], axis=1)
+        df = df.drop(['interest'], axis=1)
         df = df.drop(['f4'], axis=1)
+        df = df.drop(['early_return_amount'], axis=1)
 
         # 默认均采用众数来填充所有缺失值
         for columnName in df.columns:
@@ -198,14 +190,16 @@ class DataProcessor:
         # 第六步处理 earlies_credit_mon 属性，该属性约束到月份
         df['earlies_credit_mon'] = self.__dealString2Month(df['earlies_credit_mon'])
         x_process = df
+
+        # 再处理分箱（分段）
+        # 基于数据统计，大致按照如下分箱方式进行分箱，且分箱后其对应的元素的代表值为箱号
+        # 针对数值100-1000种的列采用 Sturges，1000-4000的列采用Rice
+        # 并且进行灵活处理，可以提前设置分段来传入DataProcessor
+
         for columnName in df.columns:
             df[columnName] = self.__dealTestDataSegment(df, columnName)
         return x_process, y_process
 
-        # 再处理分箱（分段）
-        # 基于数据统计，大致按照如下分箱方式进行分箱，且分箱后其对应的元素的代表值为箱号
-        # 针对数值100-1000种的列采用 Sturges，1000-4000的列采用Rice，4000-9000采用Freedman-Diaconis
-        # 并且进行灵活处理，可以提前设置分段来传入DataProcessor
 
 
 if __name__ == '__main__':

@@ -18,5 +18,3 @@ pred = nbc.predict(x_test)
 correct_predictions = sum(p == t for p, t in zip(pred, y_test))
 accuracy = correct_predictions / len(y_test)
 print(accuracy)
-
-
