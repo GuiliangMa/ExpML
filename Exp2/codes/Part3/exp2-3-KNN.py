@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+
+from Exp2.codes.Part4.KNNClassifier import KNNClassifier
 
 
 def KNN(X, k, t):
@@ -15,13 +18,61 @@ def KNN(X, k, t):
     return res
 
 
-def Part1(X, y):
+# def KNN(X,y, k, t):
+#     res = np.zeros((t.shape[0], np.unique(y).size))
+#     for i, test in enumerate(t):
+#         dist = np.linalg.norm(X - test, axis=1)
+#         KNN_indices = np.argsort(dist)[:k]
+#         KNN_labels = y[KNN_indices]
+#         class_probs = [np.sum(KNN_labels == cls) / k for cls in np.unique(y)]
+#         res[i] = class_probs
+#     return res
+
+
+def Part1New(X,y):
     X = X['x1']
-    X_train = X[y == 3]
+    X_train = X.reset_index(drop=True)
+    y_train = (y == 3).astype(int)
     x_min = X_train.min()
     x_max = X_train.max()
     X_train = X_train.to_numpy().reshape(-1, 1)
     X_test = np.linspace(x_min, x_max, 1000, endpoint=True).reshape(-1, 1)
+
+    knn = KNNClassifier()
+    y1_test = knn.countDensity(X_train,y_train,1, X_test)[:,1]
+    y3_test = knn.countDensity(X_train, y_train, 3, X_test)[:, 1]
+    y5_test = knn.countDensity(X_train, y_train, 5, X_test)[:, 1]
+    print(y1_test)
+
+    plt.figure(figsize=(16, 9))
+    plt.subplot(131)
+    plt.plot(X_test, y1_test, 'r')
+    plt.xlim([x_min, x_max])
+    plt.title('k=1')
+
+    plt.subplot(132)
+    plt.plot(X_test, y3_test, 'b')
+    plt.xlim([x_min, x_max])
+    plt.title('k=3')
+
+    plt.subplot(133)
+    plt.plot(X_test, y5_test, 'g')
+    plt.xlim([x_min, x_max])
+    plt.title('k=5')
+
+    plt.suptitle('Part1')
+    plt.show()
+
+def Part1(X, y):
+    X = X['x1']
+    X_train = X[y == 3].reset_index(drop=True)
+    y_train = y[y == 3].reset_index(drop=True)
+    x_min = X_train.min()
+    x_max = X_train.max()
+    X_train = X_train.to_numpy().reshape(-1, 1)
+    X_test = np.linspace(x_min, x_max, 1000, endpoint=True).reshape(-1, 1)
+
+    knn = KNNClassifier()
     y1_test = KNN(X_train, 1, X_test)
     y3_test = KNN(X_train, 3, X_test)
     y5_test = KNN(X_train, 5, X_test)
@@ -67,6 +118,26 @@ def DrawPart2(x0, x1, z, k):
     plt.show()
 
 
+def Part2New(X, y):
+    X = pd.concat([X['x1'], X['x2']], axis=1)
+    y_train = (y == 2).astype(int)
+    X_train = X.copy()
+    x1_min = X_train['x1'].min()
+    x1_max = X_train['x1'].max()
+    x2_min = X_train['x2'].min()
+    x2_max = X_train['x2'].max()
+    x0, x1 = np.meshgrid(np.linspace(x1_min, x1_max, 100).reshape(-1, 1),
+                         np.linspace(x2_min, x2_max, 100).reshape(-1, 1))
+    X_test = np.c_[x0.ravel(), x1.ravel()]
+    X_train = X_train.to_numpy()
+    knn = KNNClassifier()
+    y1_test = knn.countDensity(X_train,y_train,1, X_test)[:, 1]
+    y3_test = knn.countDensity(X_train,y_train,3, X_test)[:, 1]
+    y5_test = knn.countDensity(X_train,y_train,5, X_test)[:, 1]
+    DrawPart2(x0, x1, y1_test.reshape(x0.shape), 1)
+    DrawPart2(x0, x1, y3_test.reshape(x0.shape), 3)
+    DrawPart2(x0, x1, y5_test.reshape(x0.shape), 5)
+
 def Part2(X, y):
     X = pd.concat([X['x1'], X['x2']], axis=1)
     X_train = X[y == 2].copy()
@@ -84,6 +155,13 @@ def Part2(X, y):
     DrawPart2(x0, x1, y1_test.reshape(x0.shape), 1)
     DrawPart2(x0, x1, y3_test.reshape(x0.shape), 3)
     DrawPart2(x0, x1, y5_test.reshape(x0.shape), 5)
+
+
+def Part3New(X, y, X_test):
+    y = y-1
+    knn =KNNClassifier()
+    res = knn.countDensity(X,y,3,X_test,0)
+    print(res)
 
 
 def Part3(X, y, X_test):
@@ -106,5 +184,5 @@ Xtest = [[-0.41, 0.82, 0.88],
          [-0.81, 0.61, -0.38]]
 Xtest = np.array(Xtest)
 # Part1(X, y)
-Part2(X, y)
-# Part3(X, y, Xtest)
+# Part2New(X, y)
+Part3New(X, y, Xtest)
