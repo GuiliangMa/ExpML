@@ -20,7 +20,7 @@ def Parzen(X, y, h, test):
         for i, yEle in enumerate(yList):
             XList = X[y == yEle]
             k = ParzenWindow(XList, h, testX)
-            K[i] = k / XList.shape[0] * h ** XList.shape[1]
+            K[i] = k / (XList.shape[0] * h ** XList.shape[1])
         res[index] = yList[np.argmax(K)]
     return res
 

@@ -2,9 +2,8 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
+from KNN import kNNClassifier
 import matplotlib
-from numpy.linalg import inv
-from KNNClassifier import KNNClassifier
 
 # matplotlib.use('TkAgg')
 
@@ -52,8 +51,8 @@ def plotAccuracyK(X_train, y_train, X_test, y_test):
     x = np.linspace(1,20,20)
     accuracy = np.zeros(20)
     for k in range(20):
-        knn = KNNClassifier()
-        y_pred = knn.exe(X_train, y_train, k+1, X_test, 0)
+        knn = kNNClassifier()
+        y_pred = knn.execute(X_train, y_train, X_test,5, 0)
         accuracy[k]=np.mean(y_pred == y_test)
     plt.plot(x, accuracy,'r-')
     plt.xlabel('k')
@@ -66,8 +65,8 @@ def plotAccuracySize(data,random_state=42):
     for i,size in enumerate(x):
         X_train, y_train, X_test, y_test = splitForData(data, size, 7)
         y_test = y_test.to_numpy()
-        knn = KNNClassifier()
-        y_pred = knn.exe(X_train, y_train, 3, X_test, 0)
+        knn = kNNClassifier()
+        y_pred = knn.execute(X_train, y_train, X_test,5, 0)
         accuracy[i] = np.mean(y_pred == y_test)
     plt.plot(x, accuracy, 'r-')
     plt.xlabel('size')
@@ -80,10 +79,14 @@ data = pd.read_csv('../../data/e2.txt', sep="\t", names=['x0', 'x1', 'x2', 'y'])
 data = dealForData(data)
 X_train, y_train, X_test, y_test = splitForData(data, 0.2, 7)
 y_test = y_test.to_numpy()
-knn = KNNClassifier()
-y_pred = knn.exe(X_train, y_train, 3, X_test, 0)
+DrawScatterPlot(X_train,y_train)
+knn = kNNClassifier()
+
+y_pred = knn.execute(X_train, y_train, X_test,5, 0)
 accuracy = np.mean(y_pred == y_test)
 print(f'Accuracy: {accuracy}')
 
 plotAccuracyK(X_train, y_train, X_test, y_test)
 plotAccuracySize(data)
+
+
