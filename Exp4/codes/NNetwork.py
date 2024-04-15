@@ -194,6 +194,6 @@ if __name__ == "__main__":
 
     np.random.seed(42)
     nn = NeuralNetwork(layers=[3072, 1024, 10],
-                       activations=['relu', 'softmax'],
+                       activations=['relu', 'sigmoid'],
                        loss='cross_entropy')
-    nn.train(images, labels, 1, 64, 0.005)
+    nn.train(images, labels, 10, 64, 0.007)
