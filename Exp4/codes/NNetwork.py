@@ -221,6 +221,15 @@ if __name__ == "__main__":
 
     # np.random.seed(42)
     nn = NeuralNetwork(layers=[3072, 1024,10],
-                       activations=['relu', 'sigmoid'],
+                       activations=['relu', 'softmax'],
                        loss='cross_entropy')
-    nn.train(images, labels, 30, 64, 0.005)
+    nn.train(images, labels, 10, 64, 0.005)
+
+    test_files = ['test_batch']
+    test_images,test_labels = load_all_batches(data_dir, test_files)
+    test_images = test_images.astype(np.float32) / 255.0
+    test_labels = to_one_hot(test_labels, 10)
+    test_pred = nn.predict(test_images)
+    test_accuracy = nn.calculate_accuracy(test_labels, test_pred)
+    print('========================')
+    print(f"Test Accuracy: {test_accuracy:.2f}%")

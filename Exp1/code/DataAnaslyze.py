@@ -63,15 +63,41 @@ def check_correlation_matrix():
     for (pair, correlation) in selected_correlations.items():
         print(f"{pair}: {correlation}")
 
-train_data_path = '../process/Processed_TrainData.csv'
-df = pd.read_csv(train_data_path)
+train_data_path = '../data/train.csv'
+train_data_process_path = '../process/Processed_TrainData.csv'
+df = pd.read_csv(train_data_process_path)
 columns = df.columns.tolist()
 # check('early_return_amount_3mon')
 # checknull(columns)
 # plot_bar('interest')
+
 # correlation_matrix = df.corr()
 # correlation_matrix = correlation_matrix.abs()
 # print(correlation_matrix)
 # correlation_matrix.to_excel('../data/相关系数矩阵.xlsx', sheet_name='Correlation Matrix')
-# check_correlation_matrix()
-plot_bar('f4')
+
+check_correlation_matrix()
+
+# plot_bar('f4')
+
+# df1 = pd.read_csv(train_data_path)
+# df2 = pd.read_csv(train_data_process_path)
+# column_name = 'debt_loan_ratio'
+# data1 = df1[column_name]
+# data2 = df2[column_name]
+#
+# plt.subplot(1,2,1)
+# value_counts = data1.value_counts().sort_index()
+# value_counts.plot(kind='bar')
+# plt.xlabel('values')
+# plt.xticks([])
+# plt.ylabel('Frequency')
+#
+# plt.subplot(1,2,2)
+# value_counts = data2.value_counts().sort_index()
+# value_counts.plot(kind='bar')
+# plt.xlabel('values')
+# plt.xticks([])
+# plt.ylabel('Frequency')
+#
+# plt.show()

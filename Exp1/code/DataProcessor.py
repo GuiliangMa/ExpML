@@ -62,10 +62,46 @@ class DataProcessor:
             raise ValueError(f"Value '{matches[0]}' is a valid month")
         return month
 
+    def calculate_within_bin_variance(self,data, bins):
+        hist, bin_edges = np.histogram(data, bins=bins)
+        within_variances = []
+        for i in range(len(bin_edges) - 1):
+            bin_data = data[(data >= bin_edges[i]) & (data < bin_edges[i + 1])]
+            if len(bin_data) > 1:
+                within_variances.append(np.var(bin_data))
+            else:
+                within_variances.append(0)
+        return np.mean(within_variances) if within_variances else float('inf')
+
+    def calculate_between_bin_variance(self,data, bins):
+        hist, bin_edges = np.histogram(data, bins=bins)
+        bin_means = []
+        for i in range(len(bin_edges) - 1):
+            bin_data = data[(data >= bin_edges[i]) & (data < bin_edges[i + 1])]
+            if len(bin_data) > 0:
+                bin_means.append(np.mean(bin_data))
+        overall_mean = np.mean(data)
+        between_variance = sum(
+            [(mean - overall_mean) ** 2 * len(data[(data >= bin_edges[i]) & (data < bin_edges[i + 1])]) for i, mean in
+             enumerate(bin_means)])
+        return between_variance / len(data)
+
+    def find_optimal_bins(self,data, max_bins=90):
+        best_bins = 2
+        best_score = float('-inf')
+        for bins in range(2, max_bins + 1):
+            within_variance = self.calculate_within_bin_variance(data, bins)
+            between_variance = self.calculate_between_bin_variance(data, bins)
+            score = between_variance - within_variance  # Aim for low within and high between
+            if score > best_score:
+                best_score = score
+                best_bins = bins
+            # print(f"Bins: {bins}, Score: {score}, Within Variance: {within_variance}, Between Variance: {between_variance}")
+        return best_bins
+
     Segment = {}
 
     def __dealDataSegment(self, column_name):
-        # print(column_name)
         column = self.data[column_name]
         if column.dtype == 'region':
             return column
@@ -74,6 +110,7 @@ class DataProcessor:
                             include_lowest=True)
             return column
         length = len(column.value_counts().index)
+        # print(length)
         if 50 <= length <= 2500:
             num = 1 + int(np.log2(length))
             bins = np.linspace(column.min(), column.max(), num + 1)
@@ -83,7 +120,6 @@ class DataProcessor:
             return column
         elif 2500 < length <= len(column):
             num = 2*int(length ** (1 / 3))
-            # print(num)
             bins = np.linspace(column.min(), column.max(), num + 1)
             column = pd.cut(column, bins=bins, labels=range(num),
                             include_lowest=True)
@@ -103,19 +139,24 @@ class DataProcessor:
         column = column.apply(lambda x: self.matchMonth(x))
         return column
 
-    def Process(self):
-        y_process = self.data['isDefault']
-        self.data = self.data.drop(['isDefault'], axis=1)
+    @staticmethod
+    def drop_column(data):
+        data = data.drop(['isDefault'], axis=1)
 
         # 删除若干列,从训练集和测试集可以初步看出
         # loan_id和user_id是基本不重复的，因此可以删去。当前数据下policy_code下均为1，也可删去。
-        self.data = self.data.drop(['loan_id'], axis=1)
-        self.data = self.data.drop(['user_id'], axis=1)
-        self.data = self.data.drop(['policy_code'], axis=1)
+        data = data.drop(['loan_id'], axis=1)
+        data = data.drop(['user_id'], axis=1)
+        data = data.drop(['policy_code'], axis=1)
         # interest 与 class的强相关
-        self.data = self.data.drop(['interest'], axis=1)
-        self.data = self.data.drop(['f4'], axis=1)
-        self.data = self.data.drop(['early_return_amount'],axis=1)
+        data = data.drop(['interest'], axis=1)
+        data = data.drop(['f4'], axis=1)
+        data = data.drop(['early_return_amount'], axis=1)
+        return data
+
+    def Process(self):
+        y_process = self.data['isDefault']
+        self.data = drop_column = self.drop_column(self.data)
 
         # 默认均采用众数来填充所有缺失值
         for columnName in self.data.columns:
@@ -154,16 +195,7 @@ class DataProcessor:
 
     def Deal(self, df):
         y_process = df['isDefault']
-        df = df.drop(['isDefault'], axis=1)
-
-        # 删除若干列,从训练集和测试集可以初步看出
-        # loan_id和user_id是基本不重复的，因此可以删去。当前数据下policy_code下均为1，也可删去。
-        df = df.drop(['loan_id'], axis=1)
-        df = df.drop(['user_id'], axis=1)
-        df = df.drop(['policy_code'], axis=1)
-        df = df.drop(['interest'], axis=1)
-        df = df.drop(['f4'], axis=1)
-        df = df.drop(['early_return_amount'], axis=1)
+        df = self.drop_column(df)
 
         # 默认均采用众数来填充所有缺失值
         for columnName in df.columns:
@@ -199,7 +231,6 @@ class DataProcessor:
         for columnName in df.columns:
             df[columnName] = self.__dealTestDataSegment(df, columnName)
         return x_process, y_process
-
 
 
 if __name__ == '__main__':
