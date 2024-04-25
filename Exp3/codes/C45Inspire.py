@@ -5,7 +5,7 @@ from SplitData import splitForData
 
 
 class C45:
-    def __init__(self, max_depth=None,min_samples_split=10, min_info_gain=0.01):
+    def __init__(self, max_depth=None, min_samples_split=10, min_info_gain=0.01):
         self.tree = None
         self.result = None
 
@@ -14,7 +14,20 @@ class C45:
         self.min_samples_split = min_samples_split
         self.min_info_gain = min_info_gain
 
-    def fit(self, X, y):
+    def train_val_split(self, X, y, test_size=0.2, random_state=None):
+        # 设置随机种子
+        if random_state:
+            np.random.seed(random_state)
+
+        # 打乱索引
+        shuffled_indices = np.random.permutation(len(X))
+        test_set_size = int(len(X) * test_size)
+        test_indices = shuffled_indices[:test_set_size]
+        train_indices = shuffled_indices[test_set_size:]
+
+        return X.iloc[train_indices], X.iloc[test_indices], y.iloc[train_indices], y.iloc[test_indices]
+
+    def fit(self, X, y,isPruned=False ,test_size=0.2, random_state=None):
         self.features = X.columns.tolist()
         # 创建从类别标签到索引的映射，并保存原始标签至self.result
         unique_labels = pd.unique(y)  # 获取y中的唯一值
@@ -23,35 +36,38 @@ class C45:
         # 转换y为索引值
         label_to_index = {label: index for index, label in enumerate(unique_labels)}  # 创建从标签到索引的映射
         y_indexed = y.map(label_to_index)  # 将所有y值替换为对应的索引
+        X_train, X_val, y_train, y_val = self.train_val_split(X, y_indexed, test_size, random_state)
 
         # 构建决策树
-        self.tree = self.build_tree(X, y_indexed, 1)
+        self.tree = self.build_tree(X_train, y_train, 1)
+        if isPruned:
+            self.prune(self.tree, X_val, y_val)
+        return self.evaluate_accuracy(X_val, y_val)
 
     def build_tree(self, X, y, depth):
         # 终止条件：检查是否所有目标变量的值相同
         if len(np.unique(y)) == 1:
-            return self.result[np.unique(y)[0]]
+            return {'type': 'leaf', 'class': self.result[np.unique(y)[0]]}
 
         # 终止条件：检查是否超过最大深度
         if self.max_depth and depth > self.max_depth:
-            print(np.bincount(y))
-            return self.result[np.bincount(y).argmax()]
+            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         # 终止条件：检查样本数是否少于最小分割样本数
         if len(y) < self.min_samples_split:
-            return self.result[np.bincount(y).argmax()]
+            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         best_feature, best_threshold, best_gain = self.best_spilt(X, y)
 
         # 终止条件：检查信息增益是否足够
         if best_gain < self.min_info_gain:
-            return self.result[np.bincount(y).argmax()]
+            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         left_X, right_X, left_y, right_y = self.split(X, y, best_feature, best_threshold)
 
-        node = {'feature': best_feature, 'threshold': best_threshold}
-        node['left'] = self.build_tree(left_X, left_y, depth + 1)
-        node['right'] = self.build_tree(right_X, right_y, depth + 1)
+        node = {'feature': best_feature, 'threshold': best_threshold, 'type': 'decision',
+                'left': self.build_tree(left_X, left_y, depth + 1),
+                'right': self.build_tree(right_X, right_y, depth + 1)}
 
         return node
 
@@ -72,12 +88,12 @@ class C45:
             thresholds, gains = self.information_gain(X[feature], y)
             for i, gain in enumerate(gains):
                 if gain > average_gain:
-                    gain_ratio = self.information_gain_ratio(y,X[feature],thresholds[i])
+                    gain_ratio = self.information_gain_ratio(y, X[feature], thresholds[i])
                     if gain_ratio > best_gain_ratio:
                         best_threshold = thresholds[i]
                         best_feature = feature
-                        best_gain = gain_ratio
-        return best_feature, best_threshold, best_gain
+                        best_gain_ratio = gain_ratio
+        return best_feature, best_threshold, best_gain_ratio
 
     def information_gain(self, X_feature, y):
         thresholds = np.unique(X_feature)
@@ -122,20 +138,69 @@ class C45:
         for index, sample in X.iterrows():
             node = self.tree
             while isinstance(node, dict):
+                if node['type'] == 'leaf':
+                    break
                 if sample[node['feature']] <= node['threshold']:
                     node = node['left']
                 else:
                     node = node['right']
-            predictions.append(node)
+            predictions.append(node['class'])
         return predictions
+
+    def prune(self, node, X, y):
+        if node['type'] == 'leaf':
+            # print('leaf node')
+            return
+
+        self.prune(node['left'], X, y)
+        self.prune(node['right'], X, y)
+
+        # print('branches node')
+        origin_accuracy = self.evaluate_accuracy(X, y)
+        # print(f'origin:{origin_accuracy}')
+
+        original_left = node.get('left', None)
+        original_right = node.get('right', None)
+
+        node['type'] = 'leaf'
+        node['class'] = self.result[np.bincount(y).argmax()]
+        del node['left']
+        del node['right']
+
+        new_accuracy = self.evaluate_accuracy(X, y)
+        # print(f'new:{new_accuracy}')
+
+        if new_accuracy < origin_accuracy:
+            # print("New accuracy is low")
+            node['type'] = 'decision'
+            node['left'] = original_left
+            node['right'] = original_right
+
+    def evaluate_accuracy(self, X, y):
+        predictions = self.predict(X)
+        accuracy = np.mean([predictions[i] == self.result[y.iloc[i]] for i in range(len(y))])
+        return accuracy
 
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
-    X_train, y_train, X_test, y_test = splitForData(df, 0.2 , 'Species')
+    # 56:1 8:0.97 7可能有异常
+    X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species', random_state=10)
+
     tree = C45(max_depth=10)
-    tree.fit(X_train, y_train)
+    val_accuracy = tree.fit(X_train, y_train)
+    print(f"Not Pruned Val Accuracy: {val_accuracy:.2f}")
     predictions = tree.predict(X_test)
     print(predictions)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
-    print(f"Accuracy: {accuracy:.2f}")
+    print(f"Not Pruned Accuracy: {accuracy:.2f}")
+
+    print('--------------')
+
+    pruned_tree = C45(max_depth=10)
+    val_accuracy = pruned_tree.fit(X_train, y_train,True)
+    print(f"Pruned Val Accuracy: {val_accuracy:.2f}")
+    predictions = pruned_tree.predict(X_test)
+    print(predictions)
+    accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
+    print(f"Pruned Accuracy: {accuracy:.2f}")

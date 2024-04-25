@@ -140,7 +140,7 @@ Xtest = [[-0.41, 0.82, 0.88],
          [0.14, 0.72, 4.1],
          [-0.81, 0.61, -0.38]]
 Xtest = np.array(Xtest)
-UnderStanding1(X, y)
+# UnderStanding1(X, y)
 UnderStanding2(X,y)
 knn = kNNClassifier()
 for k in range(5):
