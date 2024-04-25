@@ -5,10 +5,14 @@ from SplitData import splitForData
 
 
 class CART:
-    def __init__(self, max_depth=None):
-        self.max_depth = max_depth
+    def __init__(self, max_depth=None,min_samples_split=10, max_gini=0.9):
         self.tree = None
         self.result = None
+
+        # 预剪枝
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.max_gini = max_gini
 
     def fit(self, X, y):
         self.features = X.columns.tolist()
@@ -28,10 +32,18 @@ class CART:
             return self.result[np.unique(y)[0]]
 
         if self.max_depth and depth > self.max_depth:
-            print(np.bincount(y))
             return self.result[np.bincount(y).argmax()]
 
-        best_feature, best_threshold = self.best_split(X, y)
+        # 预剪枝
+        if len(y) < self.min_samples_split:
+            return self.result[np.bincount(y).argmax()]
+
+        best_feature, best_threshold,best_gini = self.best_split(X, y)
+
+        # 预剪枝
+        if best_gini > self.max_gini:
+            return self.result[np.bincount(y).argmax()]
+
         left_indices = X[best_feature] <= best_threshold
         left_subtree = self.build_tree(X[left_indices], y[left_indices], depth + 1)
         right_indices = X[best_feature] > best_threshold
@@ -53,7 +65,7 @@ class CART:
                     best_gini = gini
                     best_feature = feature
                     best_threshold = threshold
-        return best_feature, best_threshold
+        return best_feature, best_threshold,best_gini
 
     def gini_index(self, X_feature, y, threshold):
         left_mask = X_feature <= threshold

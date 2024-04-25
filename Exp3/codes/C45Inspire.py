@@ -5,10 +5,14 @@ from SplitData import splitForData
 
 
 class C45:
-    def __init__(self, max_depth=None):
-        self.max_depth = max_depth
+    def __init__(self, max_depth=None,min_samples_split=10, min_info_gain=0.01):
         self.tree = None
         self.result = None
+
+        # 预剪枝
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.min_info_gain = min_info_gain
 
     def fit(self, X, y):
         self.features = X.columns.tolist()
@@ -24,14 +28,25 @@ class C45:
         self.tree = self.build_tree(X, y_indexed, 1)
 
     def build_tree(self, X, y, depth):
+        # 终止条件：检查是否所有目标变量的值相同
         if len(np.unique(y)) == 1:
             return self.result[np.unique(y)[0]]
 
+        # 终止条件：检查是否超过最大深度
         if self.max_depth and depth > self.max_depth:
             print(np.bincount(y))
             return self.result[np.bincount(y).argmax()]
 
+        # 终止条件：检查样本数是否少于最小分割样本数
+        if len(y) < self.min_samples_split:
+            return self.result[np.bincount(y).argmax()]
+
         best_feature, best_threshold, best_gain = self.best_spilt(X, y)
+
+        # 终止条件：检查信息增益是否足够
+        if best_gain < self.min_info_gain:
+            return self.result[np.bincount(y).argmax()]
+
         left_X, right_X, left_y, right_y = self.split(X, y, best_feature, best_threshold)
 
         node = {'feature': best_feature, 'threshold': best_threshold}
