@@ -64,8 +64,8 @@ def update_nodes(nodes, winner_index, city, alpha, neighborhood_size):
 
 def SOM_TSP(cities, num_nodes, epochs, initial_alpha, initial_neighborhood_size, flex=1):
     start_time = time.time()
-    # nodes = initialize_nodes(num_nodes, flex)
-    nodes = initialize_nodes_out(num_nodes, cities, flex)
+    nodes = initialize_nodes(num_nodes, flex)
+    # nodes = initialize_nodes_out(num_nodes, cities, flex)
     for epoch in range(epochs):
         np.random.shuffle(cities)
         alpha = initial_alpha * (1 - epoch / epochs)
@@ -105,7 +105,7 @@ def plotTSP(pic_data, dis, num_cities, type, k=0, save_path_name=None):
 
 if __name__ == '__main__':
     flex_size = 10
-    # DataProductor.product(data_num=10, data_dim=2, data_path='../data/data.csv', flex=flex_size)
+    # DataProductor.product(data_num=30, data_dim=2, data_path='../data/data.csv', flex=flex_size)
     data = pd.read_csv('../data/data.csv')
     num = data.shape[0]
 

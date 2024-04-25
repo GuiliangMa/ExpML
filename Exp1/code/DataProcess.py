@@ -8,12 +8,20 @@ from dateutil.relativedelta import relativedelta
 
 class DataProcessor:
     def __init__(self, dataFrame,segmentMap, fillNanRules={}):
+        '''
+        :param segmentMap: 分段分箱列表
+        :param fillNanRules: 填充规则 name:[method,defaultValue]这样的字典
+        '''
         self.data = dataFrame
         self.fillNanRules = fillNanRules
         self.isProcessed = False
         self.segmentMap = segmentMap
+        self.Segment = {}
 
     def __fillNan(self, column, typ=0, default_value=0):
+        '''
+        :param typ: 0 为众数、1为中位数、2为平均数、3为填充为default_value值
+        '''
         if typ not in [0, 1, 2, 3]:
             raise ValueError("type must be 0, 1, 2, or 3.")
         if typ == 0:
@@ -35,13 +43,17 @@ class DataProcessor:
         data = data.drop(['loan_id'], axis=1)
         data = data.drop(['user_id'], axis=1)
         data = data.drop(['policy_code'], axis=1)
+
         # interest 与 class的强相关
         # ('interest', 'class'): 0.9254597054479434
         data = data.drop(['interest'], axis=1)
+
         # ('f3', 'f4'): 0.8438089877232243
         data = data.drop(['f4'], axis=1)
+
         # ('early_return_amount', 'early_return_amount_3mon'): 0.7530913899047247
         data = data.drop(['early_return_amount'], axis=1)
+
         # ('scoring_low', 'scoring_high'): 0.8890661841570701
         data = data.drop(['scoring_low'], axis=1)
 
@@ -160,29 +172,6 @@ class DataProcessor:
             # print(f"Bins: {bins}, Score: {score}, Within Variance: {within_variance}, Between Variance: {between_variance}")
         return best_bins
 
-    Segment = {}
-
-    # segmentMap = {
-    #     'post_code': 13,
-    #     'title': 13,
-    #     'known_outstanding_loan': 13,
-    #
-    #     # 'total_loan': 13,
-    #     'monthly_payment': 13,
-    #     'issue_date': 13,
-    #     'debt_loan_ratio': 13,
-    #     'scoring_low': 13,
-    #     'scoring_high': 13,
-    #     'recircle_b': 13,
-    #     'recircle_u': 13,
-    #     'f0': 13,
-    #     'f2': 13,
-    #     'f3': 13,
-    #
-    #     'early_return_amount': 13,
-    #     'early_return_amount_3mon': 13,
-    # }
-
     def __dealDataSegment(self, column, column_name, typ='train'):
         if column_name in self.Segment:
             column = pd.cut(column, bins=self.Segment[column_name], labels=range(len(self.Segment[column_name]) - 1),
@@ -221,6 +210,7 @@ class DataProcessor:
     def dealSegment(self, data, typ='train'):
         for columnName in data.columns:
             data[columnName] = self.__dealDataSegment(data[columnName], columnName, typ=typ)
+        # print(self.Segment)
         return data
 
     def Process(self):
@@ -252,8 +242,24 @@ class DataProcessor:
         return X_process, y_process
 
 
+segmentMap = {
+        'post_code': 13,
+        'title': 13,
+        'known_outstanding_loan': 13,
+        'monthly_payment': 13,
+        'issue_date': 13,
+        'debt_loan_ratio': 13,
+        'scoring_high': 13,
+        'recircle_b': 13,
+        'recircle_u': 13,
+        'f0': 13,
+        'f2': 13,
+        'f3': 13,
+        'early_return_amount': 13,
+    }
+
 if __name__ == '__main__':
     dataframe = pd.read_csv('../data/train.csv')
-    dp = DataProcessor(dataframe)
+    dp = DataProcessor(dataframe,segmentMap)
     X, y = dp.Process()
-    X.to_csv('../process/Processed_TrainData.csv', index=False)
+    X.to_csv('../process/Processed_Train_Full_Data.csv', index=False)

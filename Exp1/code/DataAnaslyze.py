@@ -4,30 +4,29 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+dataAnasly = {}
 
-def check(column_name):
-    values_counts = df[column_name].value_counts()
-    print(values_counts)
-
-    has_null = df[column_name].isnull().any()
-    print(has_null)
-
-    unique_values = df[column_name].drop_duplicates().tolist()
-    print(len(unique_values))
-    if len(unique_values) < 30:
-        print(unique_values)
-
-
-def checknull(columns):
-    nulllist = []
+def checkColumn(columns):
     for column in columns:
+        dataAnasly[column]={}
+        data = df[column]
+        values_counts = data.value_counts()
+        dataAnasly[column]['count'] = len(values_counts)
+
+        if(len(values_counts) < 30):
+            unique_values = df[column].drop_duplicates().tolist()
+            dataAnasly[column]['unique'] = unique_values
+        else:
+            dataAnasly[column]['unique'] = []
+
+        dtype = df[column].dtype
+        dataAnasly[column]['dtype'] = dtype
+
         has_null = df[column].isnull().any()
-        if has_null == 1:
-            nulllist.append(column)
+        dataAnasly[column]['has_null'] = has_null
 
-    print(len(nulllist))
-    print(nulllist)
-
+    analysis_df = pd.DataFrame(dataAnasly).T
+    analysis_df.to_excel('../data/数据分析器.xlsx')
 
 def plot_bar(columnName):
     print(df[columnName].value_counts().sort_index())
@@ -65,39 +64,40 @@ def check_correlation_matrix():
 
 train_data_path = '../data/train.csv'
 train_data_process_path = '../process/Processed_TrainData.csv'
+
 df = pd.read_csv(train_data_process_path)
-columns = df.columns.tolist()
-# check('early_return_amount_3mon')
-# checknull(columns)
+# checkColumn(df.columns.tolist())
+
 # plot_bar('interest')
 
 # correlation_matrix = df.corr()
 # correlation_matrix = correlation_matrix.abs()
-# print(correlation_matrix)
 # correlation_matrix.to_excel('../data/相关系数矩阵.xlsx', sheet_name='Correlation Matrix')
 
-check_correlation_matrix()
+# check_correlation_matrix()
 
 # plot_bar('f4')
 
-# df1 = pd.read_csv(train_data_path)
-# df2 = pd.read_csv(train_data_process_path)
-# column_name = 'debt_loan_ratio'
-# data1 = df1[column_name]
-# data2 = df2[column_name]
-#
-# plt.subplot(1,2,1)
-# value_counts = data1.value_counts().sort_index()
-# value_counts.plot(kind='bar')
-# plt.xlabel('values')
-# plt.xticks([])
-# plt.ylabel('Frequency')
-#
-# plt.subplot(1,2,2)
-# value_counts = data2.value_counts().sort_index()
-# value_counts.plot(kind='bar')
-# plt.xlabel('values')
-# plt.xticks([])
-# plt.ylabel('Frequency')
-#
-# plt.show()
+column1_name = 'total_loan'
+column2_name = 'monthly_payment'
+column1 = df[column1_name]
+column2 = df[column2_name]
+
+plt.subplot(1,2,1)
+value_counts = column1.value_counts().sort_index()
+value_counts.plot(kind='bar')
+plt.xlabel('values')
+plt.xticks([])
+plt.ylabel('Frequency')
+plt.title(column1_name)
+
+plt.subplot(1,2,2)
+value_counts = column2.value_counts().sort_index()
+value_counts.plot(kind='bar')
+plt.xlabel('values')
+plt.xticks([])
+plt.ylabel('Frequency')
+plt.title(column2_name)
+
+plt.savefig('../pic/' + column1_name+'&'+column2_name + '_Bar.png')
+plt.show()

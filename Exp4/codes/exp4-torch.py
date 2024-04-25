@@ -38,7 +38,8 @@ if __name__ == '__main__':
     testSet = torchvision.datasets.CIFAR10(root=data_dir, train=False, download=False, transform=transform)
     testLoader = torch.utils.data.DataLoader(testSet, batch_size=32, shuffle=False, num_workers=2)
 
-    model = BPNeuralNet()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = BPNeuralNet().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
@@ -48,6 +49,7 @@ if __name__ == '__main__':
         running_loss = 0.0
         for i, data in enumerate(trainLoader, 0):
             inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -64,6 +66,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         for data in testLoader:
             images, labels = data
+            images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
