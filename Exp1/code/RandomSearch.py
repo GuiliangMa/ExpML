@@ -22,8 +22,6 @@ segmentMap = {
         'f0': 11,
         'f2': 13,
         'f3': 13,
-
-        'early_return_amount': 13,
         'early_return_amount_3mon': 13,
 }
 

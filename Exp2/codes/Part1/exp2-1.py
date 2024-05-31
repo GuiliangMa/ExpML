@@ -14,8 +14,8 @@ y = pd.DataFrame(data['y'], columns=['y'])
 X_true = X[y['y'] == 1]
 X_false = X[y['y'] == 0]
 
-plt.plot(X_true['x1'], X_true['x2'], 'r.', markersize=12)
-plt.plot(X_false['x1'], X_false['x2'], 'b.', markersize=12)
+plt.plot(X_true['x1'], X_true['x2'], 'r.', markersize=12,label='True')
+plt.plot(X_false['x1'], X_false['x2'], 'b.', markersize=12,label='False')
 
 LC = LinearClassifier(alpha=0.1, iterations=10000)
 weight = LC.fit(X, y)
@@ -40,4 +40,5 @@ z = Y_new.reshape(x0.shape)
 plt.contourf(x0, x1, z, cmap=custom_cmap)
 
 plt.axis([x_min, x_max, y_min, y_max])
+plt.legend(loc='lower left')
 plt.show()

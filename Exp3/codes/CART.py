@@ -49,18 +49,18 @@ class CART:
         if len(np.unique(y)) == 1:
             return {'type': 'leaf', 'class': self.result[np.unique(y)[0]]}
 
-        if self.max_depth and depth > self.max_depth:
-            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
-
-        # 预剪枝
-        if len(y) < self.min_samples_split:
-            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
+        # if self.max_depth and depth > self.max_depth:
+        #     return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
+        #
+        # # 预剪枝
+        # if len(y) < self.min_samples_split:
+        #     return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         best_feature, best_threshold,best_gini = self.best_split(X, y)
 
         # 预剪枝
-        if best_gini > self.max_gini:
-            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
+        # if best_gini > self.max_gini:
+        #     return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         left_indices = X[best_feature] <= best_threshold
         left_subtree = self.build_tree(X[left_indices], y[left_indices], depth + 1)
@@ -73,6 +73,10 @@ class CART:
                 "right": right_subtree}
 
     def prune_tree(self,tree, X_val, y_val):
+        # 这一段无法有效的y_val，直接返回
+        if y_val.size == 0:
+            return tree
+
         """递归剪枝决策树"""
         if tree['type'] == 'leaf':
             return tree  # 叶节点无需剪枝
@@ -167,7 +171,7 @@ class CART:
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
-    X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species',random_state=49)
+    X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species',random_state=7)
 
     tree = CART(max_depth=10)
     val_accuracy =  tree.fit(X_train, y_train)
@@ -180,7 +184,7 @@ if __name__ == '__main__':
     print("---------------")
 
     pruned_tree = CART(max_depth=10)
-    val_accuracy =  pruned_tree.fit(X_train, y_train, isPruned=True)
+    val_accuracy = pruned_tree.fit(X_train, y_train, isPruned=True)
     print(val_accuracy)
     predictions = pruned_tree.predict(X_test)
     print(predictions)

@@ -1,8 +1,5 @@
 import os
 import pickle
-
-import numpy as np
-
 import numpy as np
 
 
@@ -151,11 +148,17 @@ class NeuralNetwork:
         accuracy = 100 * correct_predictions / len(y_true_labels)
         return accuracy
 
-    def train(self, X, y, epochs, batch_size, learning_rate):
+    def train(self, X, y, epochs, batch_size, initial_lr, patience, decay_factor=0.5):
         X_temp = X[:49000]
         y_temp = y[:49000]
         X_test = X[49000:]
         y_test = y[49000:]
+
+        best_loss = float('inf')
+        best_accuracy = 0.0
+        patience_counter = 0
+        learning_rate = initial_lr
+
         for epoch in range(epochs):
             indices = np.arange(X_temp.shape[0])
             np.random.shuffle(indices)
@@ -168,16 +171,30 @@ class NeuralNetwork:
                 self.backward(y_batch)
                 self.update_weights(learning_rate)
                 if ((i / batch_size) + 1) % 100 == 0:
-                    print(
-                        f"Epoch {epoch + 1}, Batch {int((i / batch_size) + 1)}, Loss = {self.loss_func(y_test, self.forward(X_test))}")
-            print(f"Epoch {epoch + 1}, Loss: {self.loss_func(y, self.forward(X))}")
+                    current_loss = self.loss_func(y_test, self.forward(X_test))
+                    print(f"Epoch {epoch + 1}, Batch {int((i / batch_size) + 1)}, Loss = {current_loss}")
+            current_loss = self.loss_func(y, self.forward(X))
+            print(f"Epoch {epoch + 1}, Loss: {current_loss}")
             y_pred = self.predict(X_test)
             test_accuracy = self.calculate_accuracy(y_test, y_pred)
-            print(f"Epoch {epoch + 1}, Test Accuracy: {test_accuracy:.2f}%")
+            print(f"Epoch {epoch + 1}, Validation Accuracy: {test_accuracy:.2f}%")
+
+            # Check for improvement
+            if current_loss < best_loss:
+                best_loss = current_loss
+                patience_counter = 0
+            else:
+                patience_counter += 1
+
+            # Adjust learning rate if patience is exceeded
+            if patience_counter >= patience:
+                learning_rate *= decay_factor
+                patience_counter = 0
+                print(f"Learning rate reduced to {learning_rate}")
 
         y_pred = self.predict(X_test)
         test_accuracy = self.calculate_accuracy(y_test, y_pred)
-        print(f"Test Accuracy: {test_accuracy:.2f}%")
+        print(f"Validation Accuracy: {test_accuracy:.2f}%")
 
     def predict(self, x):
         # 进行前向传播得到预测结果
@@ -223,7 +240,7 @@ if __name__ == "__main__":
     nn = NeuralNetwork(layers=[3072, 1024,10],
                        activations=['relu', 'softmax'],
                        loss='cross_entropy')
-    nn.train(images, labels, 10, 64, 0.005)
+    nn.train(images, labels, 30, 64, 0.01,patience=5, decay_factor=0.5)
 
     test_files = ['test_batch']
     test_images,test_labels = load_all_batches(data_dir, test_files)

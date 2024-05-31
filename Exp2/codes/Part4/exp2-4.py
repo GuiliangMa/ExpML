@@ -77,16 +77,34 @@ def plotAccuracySize(data,random_state=42):
 
 data = pd.read_csv('../../data/e2.txt', sep="\t", names=['x0', 'x1', 'x2', 'y'])
 data = dealForData(data)
+
 X_train, y_train, X_test, y_test = splitForData(data, 0.2, 7)
 y_test = y_test.to_numpy()
 DrawScatterPlot(X_train,y_train)
 knn = kNNClassifier()
 
-y_pred = knn.execute(X_train, y_train, X_test,5, 0)
+# 基于一般欧氏距离方法
+y_pred = knn.execute(X_train, y_train, X_test,5,0)
 accuracy = np.mean(y_pred == y_test)
-print(f'Accuracy: {accuracy}')
+print(f'一般欧式-Accuracy: {accuracy}')
+
+# 基于马氏距离方法
+y_pred = knn.execute(X_train, y_train, X_test,5,1)
+accuracy = np.mean(y_pred == y_test)
+print(f'一般马氏-Accuracy: {accuracy}')
+
+# 基于单类欧式距离的方法
+y_pred = knn.execute(X_train, y_train, X_test,5,2)
+accuracy = np.mean(y_pred == y_test)
+print(f'独类欧式-Accuracy: {accuracy}')
 
 plotAccuracyK(X_train, y_train, X_test, y_test)
 plotAccuracySize(data)
+
+Temp = [40000,8,0.9]
+Temp = pd.DataFrame([Temp], columns=['x0', 'x1', 'x2'])
+y_pred = knn.execute(X_train, y_train, Temp,5,1)
+index = int(y_pred[0])  # 转换为整数
+print(yList[index])
 
 

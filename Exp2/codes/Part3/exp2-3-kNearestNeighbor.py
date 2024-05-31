@@ -77,13 +77,12 @@ def DealPart2(X_train, y_train):
     X_train = X_train.to_numpy()
     knn = kNNClassifier()
     y1_post = knn.density(X_train, y_train, X_test, 1)
-
     y3_post = knn.density(X_train, y_train, X_test, 3)
-
     y5_post = knn.density(X_train, y_train, X_test, 5)
 
     # 获得概率密度函数
     y1_density = knn.density(X_train, y_train, X_test, 1)
+
     y3_density = knn.density(X_train, y_train, X_test, 3)
     y5_density = knn.density(X_train, y_train, X_test, 5)
 
@@ -140,11 +139,11 @@ Xtest = [[-0.41, 0.82, 0.88],
          [0.14, 0.72, 4.1],
          [-0.81, 0.61, -0.38]]
 Xtest = np.array(Xtest)
-# UnderStanding1(X, y)
+UnderStanding1(X, y)
 UnderStanding2(X,y)
 knn = kNNClassifier()
 for k in range(5):
-    density = knn.density(X, y, Xtest, k + 1)
+    density = knn.density(X, y, Xtest, k + 1,2)
     print(f'k={k + 1} 时的概率密度')
     for index in range(len(density)):
         print(density[index])

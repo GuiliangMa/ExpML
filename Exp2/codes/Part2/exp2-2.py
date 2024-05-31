@@ -80,15 +80,29 @@ if __name__ == '__main__':
     print('第一部分:')
     print("For Class 1:")
     Part1(X1)
+
+    print("For Class 2:")
+    Part1(X2)
+
     print('--------------------------------------------')
     print("第二部分:")
     print("For Class 1:")
     Part2(X1)
+
+    print("For Class 2:")
+    Part2(X2)
+
     print('--------------------------------------------')
     print("第三部分:")
     print("For Class 1:")
     Part3(X1)
+
+    print("For Class 2:")
+    Part3(X2)
     print('--------------------------------------------')
     print("第四部分:")
     print("For Class 1:")
     Part4(X1)
+
+    print("For Class 2:")
+    Part4(X2)

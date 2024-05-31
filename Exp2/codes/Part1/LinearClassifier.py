@@ -12,8 +12,8 @@ class LinearClassifier:
         n = X.shape[0]
         pred = Sigmoid(np.dot(X, self.weights))
         delta = pred - y
-        # self.weights -= self.alpha * (1 / n) * np.dot(X.T, delta) #交叉熵 $L(w) = -yln[Sigmoid(Xw)]-(1-y)ln[1-Sigmoid(Xw)]$
-        self.weights -= self.alpha * (1 / n) * np.dot(X.T, delta * pred * (1 - pred)) # $L(w)=\frac{1}{2n}[Sigmoid(Xw)-y]^2$
+        self.weights -= self.alpha * (1 / n) * np.dot(X.T, delta) #交叉熵 $L(w) = -yln[Sigmoid(Xw)]-(1-y)ln[1-Sigmoid(Xw)]$
+        # self.weights -= self.alpha * (1 / n) * np.dot(X.T, delta * pred * (1 - pred)) # $L(w)=\frac{1}{2n}[Sigmoid(Xw)-y]^2$
 
     def fit(self, X, y):
         X = PrepareForTraining(X)

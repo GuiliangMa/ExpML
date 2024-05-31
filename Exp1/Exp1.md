@@ -1,5 +1,9 @@
 # 机器学习基础 实验一 实验报告
 
+2021级软件5班 马贵亮 202122202214
+
+[TOC]
+
 ## 实验目的
 
 本实验以贷款违约为背景，要求使用贝叶斯决策论的相关知识在训练集上构建模型，在测试集上进行贷款违约预测并计算分类准确度。
@@ -766,7 +770,7 @@ segmentMap = {
         'f0': 14,
         'f2': 14,
         'f3': 14,
-        'early_return_amount': 14,
+        'early_return_amount_3mon': 14,
     }
 
 train_data = pd.read_csv('../data/train.csv')
@@ -797,15 +801,279 @@ print(f'Accuracy: {accuracy}')
 
 如果把分箱数看作超参数，通过一些超参数搜索优化方法，利用网格调参搜索、随机参数搜索以及退火等方法，可以找到一个或者一系列准确率较高的分箱个数，这时，可以对比部分变化较大的箱数来探究不同的分箱策略对某些特定值分箱的可视化效果。
 
+先初步考虑分箱的优化方法，首先可以采用搜索的方法去在一定范围内穷举所有的分箱数，但是显然如果采用这种方式，整个代码的运行时间是阶乘级的，是一个NP-Hard问题，基本是不可取的，尤其是在如上方法种共有14个列需要分箱。
+
+#### 9.1 随机搜索
+
+首先考虑采用随机搜索的方法，来尝试搜索更好的分箱组数，采用如下代码：
+
+```python
+'''
+RandomSearch.py
+随机搜索查询更好的分箱数，以此追求更高的准确率
+'''
+
+import numpy as np
+import pandas as pd
+
+from Exp1.code.DataProcess import DataProcessor
+from Exp1.code.NaiveBayesClassifier import NaiveBayesClassifier
 
 
+train_data = pd.read_csv('../data/train.csv')
+test_data = pd.read_csv('../data/test.csv')
+
+segmentMap = {
+        'post_code': 13,
+        'title': 8,
+        'known_outstanding_loan': 13,
+        'monthly_payment': 20,
+        'issue_date': 12,
+        'debt_loan_ratio': 13,
+        'scoring_low': 13,
+        'scoring_high': 13,
+        'recircle_b': 13,
+        'recircle_u': 11,
+        'f0': 11,
+        'f2': 13,
+        'f3': 13,
+        'early_return_amount_3mon': 13,
+}
+
+def evaluate_model(parameters, dataT):
+    # 这个函数应该基于提供的参数处理数据并返回模型准确率
+    data = dataT.copy()
+    dp = DataProcessor(data, parameters)
+    x_train, y_train = dp.Process()  # 处理训练数据
+    x_test, y_test = dp.Deal(test_data)  # 处理测试数据
+
+    nbc = NaiveBayesClassifier(alpha=1)
+    nbc.fit(x_train, y_train)
+    predictions = nbc.predict(x_test)
+    accuracy = np.mean(predictions == y_test)
+
+    dp.Segment={}
+    dp.isProcessed = False
+    dp.data = None
+
+    return accuracy
 
 
+def random_search(data, iterations=100):
+    best_params = None
+    best_score = 0
+
+    for _ in range(iterations):
+        # 随机生成参数
+        params = {key: np.random.randint(8, 21) for key in segmentMap.keys()}
+
+        # 评估当前参数集
+        score = evaluate_model(params, data)
+
+        # 检查是否是最佳参数集
+        if score > best_score:
+            best_score = score
+            best_params = params
+
+        print(f"Current Params: {params} Score: {score}")
+
+    return best_params, best_score
 
 
+# 调用随机搜索
+best_params, best_score = random_search(train_data)
+print("Best Params:", best_params)
+print("Best Score:", best_score)
+```
 
+可以得到如下的搜索结果：
 
+由于每次的搜索存在差异性，因此每次搜索最优结果都不一定一致。
 
+![](G:\ExpMachineLearn\ExpML\Exp1\pic\result\RS100次.png)
+
+#### 9.2 模拟退火搜索
+
+但是显然这种搜索更像是漫无目的的，因此考虑整体趋势更加良好的模拟退火来对这些超参数进行搜索估计，基于如下代码实现模拟退火搜索，进行超参搜索。
+
+```python
+'''
+SimulatedAnnealing.py
+模拟退火搜索查询更好的分箱数，以此追求更高的准确率
+'''
+
+import numpy as np
+import pandas as pd
+
+from Exp1.code.DataProcess import DataProcessor
+from Exp1.code.NaiveBayesClassifier import NaiveBayesClassifier
+
+train_data = pd.read_csv('../data/train.csv')
+test_data = pd.read_csv('../data/test.csv')
+
+segmentMap = {
+    'post_code': 13, 'title': 8, 'known_outstanding_loan': 13,
+    'monthly_payment': 20, 'issue_date': 12, 'debt_loan_ratio': 13,
+    'scoring_low': 13, 'scoring_high': 13, 'recircle_b': 13,
+    'recircle_u': 11, 'f0': 11, 'f2': 13, 'f3': 13,
+    'early_return_amount': 13, 'early_return_amount_3mon': 13,
+}
+
+def evaluate_model(parameters, dataT):
+    data = dataT.copy()
+    dp = DataProcessor(data, parameters)
+    x_train, y_train = dp.Process()
+    x_test, y_test = dp.Deal(test_data)
+
+    nbc = NaiveBayesClassifier(alpha=1)
+    nbc.fit(x_train, y_train)
+    predictions = nbc.predict(x_test)
+    accuracy = np.mean(predictions == y_test)
+
+    return accuracy
+
+def simulated_annealing(data, iterations=300, temp=1.0, temp_decay=0.95):
+    current_params = {key: np.random.randint(8, 21) for key in segmentMap.keys()}
+    current_score = evaluate_model(current_params, data)
+    best_params = current_params.copy()
+    best_score = current_score
+
+    for i in range(iterations):
+        new_params = current_params.copy()
+        for key in new_params.keys():
+            if np.random.rand() < 0.5:
+                new_params[key] = np.random.randint(8, 21)
+
+        new_score = evaluate_model(new_params, data)
+
+        if new_score > current_score:
+            accept = True
+        else:
+            delta = new_score - current_score
+            accept_prob = np.exp(delta / temp)
+            accept = np.random.rand() < accept_prob
+
+        if accept:
+            current_params, current_score = new_params, new_score
+            if new_score > best_score:
+                best_params, best_score = new_params.copy(), new_score
+
+        temp *= temp_decay
+
+        print(f"Iteration {i+1}: Current Params: {current_params}, Score: {current_score}, Temp: {temp}")
+
+    return best_params, best_score
+
+best_params, best_score = simulated_annealing(train_data)
+print("Best Params:", best_params)
+print("Best Score:", best_score)
+```
+
+搜索结果如下：
+
+由于每次的搜索存在差异性，因此每次搜索最优结果都不一定一致。
+
+![](G:\ExpMachineLearn\ExpML\Exp1\pic\result\SL500次.png)
+
+#### 9.3 模拟退火+K-Fold(k=5)
+
+考虑到上述的模型都是利用测试集来进行，这缺乏一些泛化性，对训练集采用k-Fold，采用5个叠
+
+```python
+import numpy as np
+import pandas as pd
+
+from Exp1.code.DataProcess import DataProcessor
+from Exp1.code.NaiveBayesClassifier import NaiveBayesClassifier
+
+train_data = pd.read_csv('../data/train.csv')
+test_data = pd.read_csv('../data/test.csv')
+
+segmentMap = {
+    'post_code': 13, 'title': 8, 'known_outstanding_loan': 13,
+    'monthly_payment': 20, 'issue_date': 12, 'debt_loan_ratio': 13,
+    'scoring_low': 13, 'scoring_high': 13, 'recircle_b': 13,
+    'recircle_u': 11, 'f0': 11, 'f2': 13, 'f3': 13,
+    'early_return_amount': 13, 'early_return_amount_3mon': 13,
+}
+
+def evaluate_model(parameters, data, n_folds=5):
+    accuracies = []
+
+    # 计算每个折的大小
+    fold_size = len(data) // n_folds
+
+    for i in range(n_folds):
+        # 确定验证集的索引范围
+        start_idx = i * fold_size
+        end_idx = (i + 1) * fold_size if i < n_folds - 1 else len(data)
+
+        # 分割数据为训练集和验证集
+        validation_data = data.iloc[start_idx:end_idx]
+        train_data = pd.concat([data.iloc[:start_idx], data.iloc[end_idx:]])
+
+        dp = DataProcessor(train_data, parameters)
+        x_train, y_train = dp.Process()
+        x_test, y_test = dp.Deal(validation_data)
+
+        # 训练模型
+        nbc = NaiveBayesClassifier(alpha=1)
+        nbc.fit(x_train, y_train)
+
+        # 进行预测并计算准确率
+        predictions = nbc.predict(x_test)
+        accuracy = np.mean(predictions == y_test)
+        accuracies.append(accuracy)
+
+    mean_accuracy = np.mean(accuracies)
+    return mean_accuracy
+
+def simulated_annealing(data, iterations=300, temp=1.0, temp_decay=0.95):
+    current_params = {key: np.random.randint(8, 21) for key in segmentMap.keys()}
+    current_score = evaluate_model(current_params, data)
+    best_params = current_params.copy()
+    best_score = current_score
+
+    for i in range(iterations):
+        new_params = current_params.copy()
+        for key in new_params.keys():
+            if np.random.rand() < 0.5:
+                new_params[key] = np.random.randint(8, 21)
+
+        new_score = evaluate_model(new_params, data)
+
+        if new_score > current_score:
+            accept = True
+        else:
+            delta = new_score - current_score
+            accept_prob = np.exp(delta / temp)
+            accept = np.random.rand() < accept_prob
+
+        if accept:
+            current_params, current_score = new_params, new_score
+            if new_score > best_score:
+                best_params, best_score = new_params.copy(), new_score
+
+        temp *= temp_decay
+
+        print(f"Iteration {i+1}: Current Params: {current_params}, Score: {current_score}, Temp: {temp}")
+
+    return best_params, best_score
+
+best_params, best_score = simulated_annealing(train_data)
+print("Best Params:", best_params)
+print("Best Score:", best_score)
+```
+
+搜索结果如下：
+
+显然考虑更多效果时的准确率不如之前两种，但这种的泛化性更好，过拟合的情况更少。但迭代300次的时候的运行速度非常的缓慢。
+
+![](G:\ExpMachineLearn\ExpML\Exp1\pic\result\kSL300次.png)
+
+利用这个分段方式来求测试集的准确率如下：
+
+![](G:\ExpMachineLearn\ExpML\Exp1\pic\result\kFold.png)
 
 
 
@@ -822,6 +1090,7 @@ print(f'Accuracy: {accuracy}')
 |		|------- exp1.py 实验一主代码
 |		|------- RandomSearch.py 随机搜索分箱数
 |		|------- SimulatedAnnealing.py 模拟退火搜索
+|		|------- kFoldandSL.py k折叠模拟退火
 |
 |-------- data/
 |		|------- train.csv 训练数据
@@ -837,18 +1106,24 @@ print(f'Accuracy: {accuracy}')
 |		|------- Processed_TrainData.csv 临时处理数据
 |		|------- test.csv 临时处理的数据
 |
-|-------- Exp1.md 实验报告
+|-------- Exp1.md 实验报告Markdown
+|
+|-------- Exp1.pdf 实验报告pdf
 ```
 
 ## 心得体会
 
+在这次实验中，我致力于通过手动编写代码，并仅使用NumPy和Pandas库，深入理解机器学习基础原理，并将其应用于数据处理和建模过程中。
 
+首先，我进行了对数据的简单分析，以便全面了解数据的特征和结构。接着，我处理了数据中的缺失值，确保了数据的完整性和可用性。通过数据转换操作，我将文本类型和日期类型的数据转换为数值类型，以便后续的建模和分析工作。
 
+在数据处理过程中，我采取了数据删减的策略，去除了对建模无意义或冗余的特征，简化了模型的复杂度，提升了模型的泛化能力。同时，我进行了数据分箱操作，将连续型数据离散化，增强了模型对数据分布的适应性和鲁棒性。
 
+在模型建立方面，我实现了贝叶斯决策器，并对其相关理论进行了简要阐述。通过代码实现了拉普拉斯平滑等技术，提升了模型的稳定性和准确性，为后续的分类任务提供了可靠的基础。
 
+在实验执行阶段，我采用了多种优化调整方法，包括随机搜索、模拟退火搜索以及模拟退火结合K-Fold交叉验证等技术，有效提升了模型的性能和泛化能力，为模型的实际应用提供了可靠的支持。
 
+最后，通过整理代码目录结构，使得代码具有良好的组织结构和可读性。在这个过程中，我深入理解了机器学习中的基础概念和常用技术，并通过实践加深了对这些技术的理解和掌握。
 
-
-
-
+总的来说，这次实验不仅加深了我的对机器学习基础知识的理解，也提高了我的编程和数据处理能力。这是一个有益的学习经历，为我未来在机器学习领域的进一步探索和实践奠定了坚实的基础。
 

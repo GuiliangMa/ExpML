@@ -127,7 +127,9 @@ class kNNClassifier:
             probs = self.kNN_Mahalanobis_Count(X_train, y_train, X_test.to_numpy(), k)
         elif typ == 2:
             probs = self.kNN_Vn(X_train, y_train, X_test.to_numpy(), k)
+
         predict = np.zeros(X_test.shape[0])
+        # print(probs)
         for i, class_prob in enumerate(probs):
             max_prob = -1
             for y in class_prob:
@@ -181,6 +183,7 @@ def splitForData(data, test_size, random_state):
 if __name__ == "__main__":
     data = pd.read_csv('../../data/e2.txt', sep="\t", names=['x0', 'x1', 'x2', 'y'])
     data = dealForData(data)
+
     X_train, y_train, X_test, y_test = splitForData(data, 0.2, 7)
     y_test = y_test.to_numpy()
     knn = kNNClassifier()
