@@ -15,7 +15,7 @@ class ID3Continuous:
         Ent = 0.0
         for label in labels:
             p = len(y[y == label]) / len(y)
-            Ent -= p * np.log2(p)
+            Ent -= p * np.log(p)
         return Ent
 
     def best_spilt(self, X, y):
@@ -40,11 +40,11 @@ class ID3Continuous:
                     best_feature = i
         return best_feature, best_threshold
 
-    def build_tree(self, X, y, features, depth=0, max_depth=10):
+    def build_tree(self, X, y, features, depth=0):
         if len(np.unique(y)) == 1:
             return self.result[np.unique(y)[0]]
 
-        if self.max_depth and depth > self.max_depth:
+        if self.max_depth is not None and depth > self.max_depth:
             return self.result[np.bincount(y).argmax()]
 
         best_feature, best_threshold = self.best_spilt(X, y)
@@ -53,11 +53,11 @@ class ID3Continuous:
         node = {}
         node['feature'] = features[best_feature]
         node['threshold'] = best_threshold
-        node['left'] = self.build_tree(X[left_indices], y[left_indices], features, depth + 1, max_depth)
-        node['right'] = self.build_tree(X[right_indices], y[right_indices], features, depth + 1, max_depth)
+        node['left'] = self.build_tree(X[left_indices], y[left_indices], features, depth + 1)
+        node['right'] = self.build_tree(X[right_indices], y[right_indices], features, depth + 1)
         return node
 
-    def fit(self, X, y, max_depth=10):
+    def fit(self, X, y):
         features = X.columns.tolist()
         X = X.values
         unique_labels = pd.unique(y)  # 获取y中的唯一值
@@ -66,7 +66,7 @@ class ID3Continuous:
         # 转换y为索引值
         label_to_index = {label: index for index, label in enumerate(unique_labels)}  # 创建从标签到索引的映射
         y_indexed = y.map(label_to_index)  # 将所有y值替换为对应的索引
-        self.tree = self.build_tree(X, y_indexed, features, 0, max_depth)
+        self.tree = self.build_tree(X, y_indexed, features, 0)
 
     def predict(self, X):
         predictions = []
