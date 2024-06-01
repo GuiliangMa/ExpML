@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from SplitData import splitForData
 import pydotplus
-from graphviz import Source
+from graphviz import Digraph
 from IPython.display import Image, display
 
 
@@ -21,6 +21,7 @@ class ID3Discrete:
         self.max_depth = max_depth
         self.tree = None
         self.result = None
+        self.cnt = 0
 
     def best_split(self, X, y):
         base_entropy = entropy(y)
@@ -46,20 +47,30 @@ class ID3Discrete:
                 best_feature = i
                 best_splits = splits
 
-        return best_feature, best_splits
+        return best_feature, best_splits,best_information_gain
 
     def build_tree(self, X, y, features, depth=0):
+        tree = {}
         if len(np.unique(y)) == 1:
-            return self.result[np.unique(y)[0]]
+            tree['type'] = 'leaf'
+            tree['value'] = self.result[np.unique(y)[0]]
+            return tree
         if len(features) == 0 or (self.max_depth is not None and depth >= self.max_depth):
-            return self.result[np.bincount(y).argmax()]
+            tree['type'] = 'leaf'
+            tree['value'] = self.result[np.bincount(y).argmax()]
+            return tree
 
-        best_feature, best_splits = self.best_split(X, y)
+        best_feature, best_splits,best_gain = self.best_split(X, y)
         if best_feature is None:
-            return self.result[np.bincount(y).argmax()]
+            tree['type'] = 'leaf'
+            tree['value'] = self.result[np.bincount(y).argmax()]
+            return tree
 
-        tree = {features[best_feature]: {}}
-
+        # tree = {features[best_feature]: {}}
+        tree['best_feature'] = features[best_feature]
+        tree['splits'] = {}
+        tree['type'] = "inner"
+        tree['gain'] = best_gain
         remaining_features = features[:best_feature] + features[best_feature + 1:]
 
         for feature_value, subset in best_splits.items():
@@ -68,7 +79,7 @@ class ID3Discrete:
             subset_X = np.delete(subset_X, best_feature, axis=1)
 
             subtree = self.build_tree(subset_X, subset_y, remaining_features, depth + 1)
-            tree[features[best_feature]][feature_value] = subtree
+            tree['splits'][feature_value] = subtree
         return tree
 
     def fit(self, X, y):
@@ -83,12 +94,12 @@ class ID3Discrete:
         self.tree = self.build_tree(X, y_indexed, features, 0)
 
     def predict_one(self, x, tree):
-        if not isinstance(tree, dict):
-            return tree
-        feature = list(tree.keys())[0]
-        if x[feature] in tree[feature]:
-            subtree = tree[feature][x[feature]]
-            return self.predict_one(x, subtree)
+        if tree['type'] == 'leaf':
+            return tree['value']
+        feature = tree['best_feature']
+        feature_value = x[feature]
+        if feature_value in tree['splits']:
+            return self.predict_one(x, tree['splits'][feature_value])
         else:
             return self.result[0]
 
@@ -96,25 +107,37 @@ class ID3Discrete:
         return X.apply(lambda x: self.predict_one(x, self.tree), axis=1)
 
     def plot_tree(self):
-        dot_data = pydotplus.graphviz.Dot(graph_type="graph")
 
-        def add_nodes_edges(tree, parent_name=None):
-            if isinstance(tree, dict):
-                for k, v in tree.items():
-                    print(k, v)
-                    node_name = str(k)
-                    dot_data.add_node(pydotplus.graphviz.Node(node_name, shape="box"))
-                    if parent_name:
-                        dot_data.add_edge(pydotplus.graphviz.Edge(parent_name, node_name, dir="none"))
-                    add_nodes_edges(v, node_name)
-            else:
-                node_name = str(tree)
-                dot_data.add_node(pydotplus.graphviz.Node(node_name, color="red"))
+        def add_nodes_edges(tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+            if dot is None:
+                dot = Digraph()
+                # dot = Digraph(graph_attr={"splines": "line"})
+
+            if tree['type'] == 'leaf':
+                if edge_label is not None:
+                    node_name = f"{feature_name} = {edge_label}\n{str(tree['value'])}"
+                else:
+                    node_name = str(tree['value'])
+                dot.node(node_name, color="red")
                 if parent_name:
-                    dot_data.add_edge(pydotplus.graphviz.Edge(parent_name, node_name, dir="none"))
+                    dot.edge(parent_name, node_name)
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} = {edge_label}\nDivided By {tree['best_feature']}\nGain={round(tree['gain'],4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['best_feature']}\nGain={round(tree['gain'],4)}"
+                dot.node(node_name, color="blue", shape='box')
+                if parent_name:
+                    dot.edge(parent_name, node_name)
 
-        add_nodes_edges(self.tree)
-        return dot_data
+                for feature_value, subtree in tree['splits'].items():
+                    add_nodes_edges(subtree, dot=dot, parent_name=node_name, edge_label=str(feature_value),
+                                    feature_name=tree['best_feature'])
+
+            return dot
+
+        dot = add_nodes_edges(self.tree)
+        return dot
 
 
 if __name__ == "__main__":
@@ -126,10 +149,9 @@ if __name__ == "__main__":
     predictions = np.array(predictions)
     # print(predictions)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
-    # print(f"Accuracy: {accuracy:.2f}")
+    print(f"Accuracy: {accuracy:.2f}")
 
-    dot_data = model.plot_tree()
-    graph = pydotplus.graph_from_dot_data(dot_data.to_string())
-    graph.write_png("ID3discrete.png")
-    image = Image(filename="ID3discrete.png")
+    dot = model.plot_tree()
+    dot.render("../pic/ID3/ID3discrete", format='png')
+    image = Image(filename="../pic/ID3/ID3discrete.png")
     display(image)

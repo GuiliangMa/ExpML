@@ -1,0 +1,115 @@
+digraph {
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" [color=blue shape=box]
+	"PetalLength <=1.9
+Iris-setosa" [color=red]
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" -> "PetalLength <=1.9
+Iris-setosa"
+	"PetalLength > 1.9
+Divided By PetalLength
+Gain-Ratio=0.7174" [color=blue shape=box]
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" -> "PetalLength > 1.9
+Divided By PetalLength
+Gain-Ratio=0.7174"
+	"PetalLength <=4.7
+Iris-versicolor" [color=red]
+	"PetalLength > 1.9
+Divided By PetalLength
+Gain-Ratio=0.7174" -> "PetalLength <=4.7
+Iris-versicolor"
+	"PetalLength > 4.7
+Divided By PetalWidth
+Gain-Ratio=0.3196" [color=blue shape=box]
+	"PetalLength > 1.9
+Divided By PetalLength
+Gain-Ratio=0.7174" -> "PetalLength > 4.7
+Divided By PetalWidth
+Gain-Ratio=0.3196"
+	"PetalWidth <=1.7
+Divided By SepalLength
+Gain-Ratio=0.338" [color=blue shape=box]
+	"PetalLength > 4.7
+Divided By PetalWidth
+Gain-Ratio=0.3196" -> "PetalWidth <=1.7
+Divided By SepalLength
+Gain-Ratio=0.338"
+	"SepalLength <=6.3
+Divided By PetalLength
+Gain-Ratio=0.4459" [color=blue shape=box]
+	"PetalWidth <=1.7
+Divided By SepalLength
+Gain-Ratio=0.338" -> "SepalLength <=6.3
+Divided By PetalLength
+Gain-Ratio=0.4459"
+	"PetalLength <=4.9
+Iris-versicolor" [color=red]
+	"SepalLength <=6.3
+Divided By PetalLength
+Gain-Ratio=0.4459" -> "PetalLength <=4.9
+Iris-versicolor"
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain-Ratio=1.0" [color=blue shape=box]
+	"SepalLength <=6.3
+Divided By PetalLength
+Gain-Ratio=0.4459" -> "PetalLength > 4.9
+Divided By PetalWidth
+Gain-Ratio=1.0"
+	"PetalWidth <=1.5
+Iris-virginica" [color=red]
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain-Ratio=1.0" -> "PetalWidth <=1.5
+Iris-virginica"
+	"PetalWidth > 1.5
+Iris-versicolor" [color=red]
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain-Ratio=1.0" -> "PetalWidth > 1.5
+Iris-versicolor"
+	"SepalLength > 6.3
+Iris-versicolor" [color=red]
+	"PetalWidth <=1.7
+Divided By SepalLength
+Gain-Ratio=0.338" -> "SepalLength > 6.3
+Iris-versicolor"
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain-Ratio=0.2576" [color=blue shape=box]
+	"PetalLength > 4.7
+Divided By PetalWidth
+Gain-Ratio=0.3196" -> "PetalWidth > 1.7
+Divided By PetalLength
+Gain-Ratio=0.2576"
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain-Ratio=1.0" [color=blue shape=box]
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain-Ratio=0.2576" -> "PetalLength <=4.8
+Divided By SepalLength
+Gain-Ratio=1.0"
+	"SepalLength <=5.9
+Iris-versicolor" [color=red]
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain-Ratio=1.0" -> "SepalLength <=5.9
+Iris-versicolor"
+	"SepalLength > 5.9
+Iris-virginica" [color=red]
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain-Ratio=1.0" -> "SepalLength > 5.9
+Iris-virginica"
+	"PetalLength > 4.8
+Iris-virginica" [color=red]
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain-Ratio=0.2576" -> "PetalLength > 4.8
+Iris-virginica"
+}

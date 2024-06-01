@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from SplitData import splitForData
+from graphviz import Digraph
+from IPython.display import Image, display
 
 
 class C45:
@@ -27,7 +29,6 @@ class C45:
             return self.result[np.unique(y)[0]]
 
         if self.max_depth and depth > self.max_depth:
-            print(np.bincount(y))
             return self.result[np.bincount(y).argmax()]
 
         best_feature, best_threshold, best_gain = self.best_split(X, y)
@@ -39,6 +40,7 @@ class C45:
         node = {'feature': best_feature, 'threshold': best_threshold}
         node['left'] = self.build_tree(left_X, left_y, depth + 1)
         node['right'] = self.build_tree(right_X, right_y, depth + 1)
+        node['gain_ratio'] = best_gain
 
         return node
 
@@ -100,13 +102,53 @@ class C45:
             predictions.append(node)
         return predictions
 
+    def plot_tree(self):
+        def add_nodes_edges(tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+            if dot is None:
+                dot = Digraph()
+                # dot = Digraph(graph_attr={"splines": "line"})
+
+            if not isinstance(tree, dict):
+                if edge_label is not None:
+                    node_name = f"{feature_name} {edge_label}\n{str(tree)}"
+                else:
+                    node_name = str(tree)
+                dot.node(node_name, color="red")
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} {edge_label}\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                dot.node(node_name, color="blue", shape='box')
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+
+                if 'left' in tree:
+                    add_nodes_edges(tree['left'], dot=dot, parent_name=node_name,
+                                    edge_label="<=" + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+                if 'right' in tree:
+                    add_nodes_edges(tree['right'], dot=dot, parent_name=node_name,
+                                    edge_label="> " + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+            return dot
+
+        dot = add_nodes_edges(self.tree)
+        return dot
+
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
     X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species')
-    tree = C45(max_depth=10)
-    tree.fit(X_train, y_train)
-    predictions = tree.predict(X_test)
-    print(predictions)
+    model = C45(max_depth=10)
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
     print(f"Accuracy: {accuracy:.2f}")
+
+    dot = model.plot_tree()
+    dot.render("../pic/C45/C45", format='png')
+    image = Image(filename="../pic/C45/C45.png")
+    display(image)

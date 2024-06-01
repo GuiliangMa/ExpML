@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+from graphviz import Digraph
+from IPython.display import Image, display
+
 from SplitData import splitForData
 
 
 class ID3Continuous:
-    def __init__(self,max_depth=None):
+    def __init__(self, max_depth=None):
         self.max_depth = max_depth
         self.tree = None
         self.result = None
@@ -38,7 +40,7 @@ class ID3Continuous:
                     best_information_gain = information_gain
                     best_threshold = threshold
                     best_feature = i
-        return best_feature, best_threshold
+        return best_feature, best_threshold, best_information_gain
 
     def build_tree(self, X, y, features, depth=0):
         if len(np.unique(y)) == 1:
@@ -47,12 +49,13 @@ class ID3Continuous:
         if self.max_depth is not None and depth > self.max_depth:
             return self.result[np.bincount(y).argmax()]
 
-        best_feature, best_threshold = self.best_spilt(X, y)
+        best_feature, best_threshold,best_gain = self.best_spilt(X, y)
         left_indices = X[:, best_feature] <= best_threshold
         right_indices = X[:, best_feature] > best_threshold
         node = {}
         node['feature'] = features[best_feature]
         node['threshold'] = best_threshold
+        node['gain'] = best_gain
         node['left'] = self.build_tree(X[left_indices], y[left_indices], features, depth + 1)
         node['right'] = self.build_tree(X[right_indices], y[right_indices], features, depth + 1)
         return node
@@ -70,7 +73,7 @@ class ID3Continuous:
 
     def predict(self, X):
         predictions = []
-        for index,sample in X.iterrows():
+        for index, sample in X.iterrows():
             node = self.tree
             while isinstance(node, dict):
                 if sample[node['feature']] <= node['threshold']:
@@ -80,13 +83,54 @@ class ID3Continuous:
             predictions.append(node)
         return predictions
 
+    def plot_tree(self):
+        def add_nodes_edges(tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+            if dot is None:
+                dot = Digraph()
+                # dot = Digraph(graph_attr={"splines": "line"})
+
+            if not isinstance(tree, dict):
+                if edge_label is not None:
+                    node_name = f"{feature_name} {edge_label}\n{str(tree)}"
+                else:
+                    node_name = str(tree)
+                dot.node(node_name, color="red")
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} {edge_label}\nDivided By {tree['feature']}\nGain={round(tree['gain'],4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['feature']}\nGain={round(tree['gain'],4)}"
+                dot.node(node_name, color="blue", shape='box')
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+
+                if 'left' in tree:
+                    add_nodes_edges(tree['left'], dot=dot, parent_name=node_name,
+                                    edge_label="<=" + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+                if 'right' in tree:
+                    add_nodes_edges(tree['right'], dot=dot, parent_name=node_name,
+                                    edge_label="> " + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+            return dot
+
+        dot = add_nodes_edges(self.tree)
+        return dot
+
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
     X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species')
-    tree = ID3Continuous(max_depth=10)
-    tree.fit(X_train, y_train)
-    predictions = tree.predict(X_test)
+    model = ID3Continuous(max_depth=10)
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
     print(predictions)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
     print(f"Accuracy: {accuracy:.2f}")
+
+    dot = model.plot_tree()
+    dot.render("../pic/ID3/ID3continous", format='png')
+    image = Image(filename="../pic/ID3/ID3continous.png")
+    display(image)

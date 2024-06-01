@@ -1,0 +1,87 @@
+digraph {
+	"Root
+Divided By PetalLength
+Gain=0.6525" [color=blue shape=box]
+	"PetalLength <=1.9
+Iris-setosa" [color=red]
+	"Root
+Divided By PetalLength
+Gain=0.6525" -> "PetalLength <=1.9
+Iris-setosa"
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain=0.4943" [color=blue shape=box]
+	"Root
+Divided By PetalLength
+Gain=0.6525" -> "PetalLength > 1.9
+Divided By PetalWidth
+Gain=0.4943"
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gain=0.1797" [color=blue shape=box]
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain=0.4943" -> "PetalWidth <=1.7
+Divided By PetalLength
+Gain=0.1797"
+	"PetalLength <=4.9
+Iris-versicolor" [color=red]
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gain=0.1797" -> "PetalLength <=4.9
+Iris-versicolor"
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain=0.673" [color=blue shape=box]
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gain=0.1797" -> "PetalLength > 4.9
+Divided By PetalWidth
+Gain=0.673"
+	"PetalWidth <=1.5
+Iris-virginica" [color=red]
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain=0.673" -> "PetalWidth <=1.5
+Iris-virginica"
+	"PetalWidth > 1.5
+Iris-versicolor" [color=red]
+	"PetalLength > 4.9
+Divided By PetalWidth
+Gain=0.673" -> "PetalWidth > 1.5
+Iris-versicolor"
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain=0.0739" [color=blue shape=box]
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain=0.4943" -> "PetalWidth > 1.7
+Divided By PetalLength
+Gain=0.0739"
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain=0.6365" [color=blue shape=box]
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain=0.0739" -> "PetalLength <=4.8
+Divided By SepalLength
+Gain=0.6365"
+	"SepalLength <=5.9
+Iris-versicolor" [color=red]
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain=0.6365" -> "SepalLength <=5.9
+Iris-versicolor"
+	"SepalLength > 5.9
+Iris-virginica" [color=red]
+	"PetalLength <=4.8
+Divided By SepalLength
+Gain=0.6365" -> "SepalLength > 5.9
+Iris-virginica"
+	"PetalLength > 4.8
+Iris-virginica" [color=red]
+	"PetalWidth > 1.7
+Divided By PetalLength
+Gain=0.0739" -> "PetalLength > 4.8
+Iris-virginica"
+}
