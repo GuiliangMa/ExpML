@@ -1,0 +1,87 @@
+digraph {
+	"Root
+Divided By PetalLength
+Gini=0.3438" [color=blue shape=box]
+	"PetalLength <=1.9
+Iris-setosa" [color=red]
+	"Root
+Divided By PetalLength
+Gini=0.3438" -> "PetalLength <=1.9
+Iris-setosa"
+	"PetalLength > 1.9
+Divided By PetalLength
+Gini=0.0864" [color=blue shape=box]
+	"Root
+Divided By PetalLength
+Gini=0.3438" -> "PetalLength > 1.9
+Divided By PetalLength
+Gini=0.0864"
+	"PetalLength <=4.8
+Divided By PetalWidth
+Gini=0.0312" [color=blue shape=box]
+	"PetalLength > 1.9
+Divided By PetalLength
+Gini=0.0864" -> "PetalLength <=4.8
+Divided By PetalWidth
+Gini=0.0312"
+	"PetalWidth <=1.6
+Iris-versicolor" [color=red]
+	"PetalLength <=4.8
+Divided By PetalWidth
+Gini=0.0312" -> "PetalWidth <=1.6
+Iris-versicolor"
+	"PetalWidth > 1.6
+Divided By SepalLength
+Gini=0.0" [color=blue shape=box]
+	"PetalLength <=4.8
+Divided By PetalWidth
+Gini=0.0312" -> "PetalWidth > 1.6
+Divided By SepalLength
+Gini=0.0"
+	"SepalLength <=5.9
+Iris-versicolor" [color=red]
+	"PetalWidth > 1.6
+Divided By SepalLength
+Gini=0.0" -> "SepalLength <=5.9
+Iris-versicolor"
+	"SepalLength > 5.9
+Iris-virginica" [color=red]
+	"PetalWidth > 1.6
+Divided By SepalLength
+Gini=0.0" -> "SepalLength > 5.9
+Iris-virginica"
+	"PetalLength > 4.8
+Divided By PetalWidth
+Gini=0.0588" [color=blue shape=box]
+	"PetalLength > 1.9
+Divided By PetalLength
+Gini=0.0864" -> "PetalLength > 4.8
+Divided By PetalWidth
+Gini=0.0588"
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gini=0.0" [color=blue shape=box]
+	"PetalLength > 4.8
+Divided By PetalWidth
+Gini=0.0588" -> "PetalWidth <=1.7
+Divided By PetalLength
+Gini=0.0"
+	"PetalLength <=5.0
+Iris-versicolor" [color=red]
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gini=0.0" -> "PetalLength <=5.0
+Iris-versicolor"
+	"PetalLength > 5.0
+Iris-virginica" [color=red]
+	"PetalWidth <=1.7
+Divided By PetalLength
+Gini=0.0" -> "PetalLength > 5.0
+Iris-virginica"
+	"PetalWidth > 1.7
+Iris-virginica" [color=red]
+	"PetalLength > 4.8
+Divided By PetalWidth
+Gini=0.0588" -> "PetalWidth > 1.7
+Iris-virginica"
+}

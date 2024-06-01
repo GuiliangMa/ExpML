@@ -1,0 +1,31 @@
+digraph {
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" [color=blue shape=box]
+	"PetalLength <=1.9
+Iris-setosa" [color=red]
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" -> "PetalLength <=1.9
+Iris-setosa"
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain-Ratio=0.7298" [color=blue shape=box]
+	"Root
+Divided By PetalLength
+Gain-Ratio=1.0" -> "PetalLength > 1.9
+Divided By PetalWidth
+Gain-Ratio=0.7298"
+	"PetalWidth <=1.6
+Iris-versicolor" [color=red]
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain-Ratio=0.7298" -> "PetalWidth <=1.6
+Iris-versicolor"
+	"PetalWidth > 1.6
+Iris-virginica" [color=red]
+	"PetalLength > 1.9
+Divided By PetalWidth
+Gain-Ratio=0.7298" -> "PetalWidth > 1.6
+Iris-virginica"
+}
