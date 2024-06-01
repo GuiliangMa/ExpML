@@ -1,11 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from SplitData import splitForData
+from graphviz import Digraph
+from IPython.display import Image, display
 
 
 class C45:
-    def __init__(self, max_depth=None, min_samples_split=10, min_info_gain=0.01):
+    def __init__(self, max_depth=None, min_samples_split=1, min_info_gain=0.01):
         self.tree = None
         self.result = None
 
@@ -27,7 +28,7 @@ class C45:
 
         return X.iloc[train_indices], X.iloc[test_indices], y.iloc[train_indices], y.iloc[test_indices]
 
-    def fit(self, X, y,isPruned=False ,test_size=0.2, random_state=None):
+    def fit(self, X, y, isPruned=False, test_size=0.2, random_state=42):
         self.features = X.columns.tolist()
         # 创建从类别标签到索引的映射，并保存原始标签至self.result
         unique_labels = pd.unique(y)  # 获取y中的唯一值
@@ -65,9 +66,13 @@ class C45:
 
         left_X, right_X, left_y, right_y = self.split(X, y, best_feature, best_threshold)
 
-        node = {'feature': best_feature, 'threshold': best_threshold, 'type': 'decision',
+        node = {'feature': best_feature,
+                'threshold': best_threshold,
+                'type': 'inner',
                 'left': self.build_tree(left_X, left_y, depth + 1),
-                'right': self.build_tree(right_X, right_y, depth + 1)}
+                'right': self.build_tree(right_X, right_y, depth + 1),
+                'gain_ratio': best_gain,
+                'most_label': self.result[np.bincount(y).argmax()]}
 
         return node
 
@@ -163,7 +168,7 @@ class C45:
         original_right = node.get('right', None)
 
         node['type'] = 'leaf'
-        node['class'] = self.result[np.bincount(y).argmax()]
+        node['class'] = node['most_label']
         del node['left']
         del node['right']
 
@@ -172,7 +177,7 @@ class C45:
 
         if new_accuracy < origin_accuracy:
             # print("New accuracy is low")
-            node['type'] = 'decision'
+            node['type'] = 'inner'
             node['left'] = original_left
             node['right'] = original_right
 
@@ -180,6 +185,42 @@ class C45:
         predictions = self.predict(X)
         accuracy = np.mean([predictions[i] == self.result[y.iloc[i]] for i in range(len(y))])
         return accuracy
+
+    def plot_tree(self):
+        def add_nodes_edges(tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+            if dot is None:
+                dot = Digraph()
+                # dot = Digraph(graph_attr={"splines": "line"})
+
+            if tree['type'] == 'leaf':
+                if edge_label is not None:
+                    node_name = f"{feature_name} {edge_label}\n{str(tree['class'])}"
+                else:
+                    node_name = str(tree)
+                dot.node(node_name, color="red")
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} {edge_label}\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                dot.node(node_name, color="blue", shape='box')
+                if parent_name:
+                    dot.edge(parent_name, node_name)
+
+                if 'left' in tree:
+                    add_nodes_edges(tree['left'], dot=dot, parent_name=node_name,
+                                    edge_label="<=" + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+                if 'right' in tree:
+                    add_nodes_edges(tree['right'], dot=dot, parent_name=node_name,
+                                    edge_label="> " + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+            return dot
+
+        dot = add_nodes_edges(self.tree)
+        return dot
 
 
 if __name__ == '__main__':
@@ -195,12 +236,22 @@ if __name__ == '__main__':
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
     print(f"Not Pruned Accuracy: {accuracy:.2f}")
 
+    dot = tree.plot_tree()
+    dot.render("../pic/C45/C45_EarlyPrune", format='png')
+    image = Image(filename="../pic/C45/C45_EarlyPrune.png")
+    display(image)
+
     print('--------------')
 
     pruned_tree = C45(max_depth=10)
-    val_accuracy = pruned_tree.fit(X_train, y_train,True)
+    val_accuracy = pruned_tree.fit(X_train, y_train, True)
     print(f"Pruned Val Accuracy: {val_accuracy:.2f}")
     predictions = pruned_tree.predict(X_test)
     print(predictions)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
     print(f"Pruned Accuracy: {accuracy:.2f}")
+
+    dot = pruned_tree.plot_tree()
+    dot.render("../pic/C45/C45_AfterPrune", format='png')
+    image = Image(filename="../pic/C45/C45_AfterPrune.png")
+    display(image)
