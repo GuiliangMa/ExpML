@@ -17,8 +17,9 @@ X_false = X[y['y'] == 0]
 plt.plot(X_true['x1'], X_true['x2'], 'r.', markersize=12,label='True')
 plt.plot(X_false['x1'], X_false['x2'], 'b.', markersize=12,label='False')
 
-LC = LinearClassifier(alpha=0.1, iterations=10000)
+LC = LinearClassifier(alpha=0.1, iterations=100000)
 weight = LC.fit(X, y)
+print(weight)
 
 # 以下内容便于图像展示
 
