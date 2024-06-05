@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from Exp1.code.DataProcess import DataProcessor
-from Exp1.code.NaiveBayesClassifier import NaiveBayesClassifier
+from Exp1.codes.DataProcess import DataProcessor
+from Exp1.codes.NaiveBayesClassifier import NaiveBayesClassifier
 
 
 train_data = pd.read_csv('../data/train.csv')

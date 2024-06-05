@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from Exp1.code.DataProcess import DataProcessor
-from Exp1.code.NaiveBayesClassifier import NaiveBayesClassifier
+from Exp1.codes.DataProcess import DataProcessor
+from Exp1.codes.NaiveBayesClassifier import NaiveBayesClassifier
 
 train_data = pd.read_csv('../data/train.csv')
 test_data = pd.read_csv('../data/test.csv')
@@ -15,38 +15,20 @@ segmentMap = {
     'early_return_amount': 13, 'early_return_amount_3mon': 13,
 }
 
-def evaluate_model(parameters, data, n_folds=5):
-    accuracies = []
+def evaluate_model(parameters, dataT):
+    data = dataT.copy()
+    dp = DataProcessor(data, parameters)
+    x_train, y_train = dp.Process()
+    x_test, y_test = dp.Deal(test_data)
 
-    # 计算每个折的大小
-    fold_size = len(data) // n_folds
+    nbc = NaiveBayesClassifier(alpha=1)
+    nbc.fit(x_train, y_train)
+    predictions = nbc.predict(x_test)
+    accuracy = np.mean(predictions == y_test)
 
-    for i in range(n_folds):
-        # 确定验证集的索引范围
-        start_idx = i * fold_size
-        end_idx = (i + 1) * fold_size if i < n_folds - 1 else len(data)
+    return accuracy
 
-        # 分割数据为训练集和验证集
-        validation_data = data.iloc[start_idx:end_idx]
-        train_data = pd.concat([data.iloc[:start_idx], data.iloc[end_idx:]])
-
-        dp = DataProcessor(train_data, parameters)
-        x_train, y_train = dp.Process()
-        x_test, y_test = dp.Deal(validation_data)
-
-        # 训练模型
-        nbc = NaiveBayesClassifier(alpha=1)
-        nbc.fit(x_train, y_train)
-
-        # 进行预测并计算准确率
-        predictions = nbc.predict(x_test)
-        accuracy = np.mean(predictions == y_test)
-        accuracies.append(accuracy)
-
-    mean_accuracy = np.mean(accuracies)
-    return mean_accuracy
-
-def simulated_annealing(data, iterations=300, temp=1.0, temp_decay=0.95):
+def simulated_annealing(data, iterations=500, temp=1.0, temp_decay=0.95):
     current_params = {key: np.random.randint(8, 21) for key in segmentMap.keys()}
     current_score = evaluate_model(current_params, data)
     best_params = current_params.copy()
