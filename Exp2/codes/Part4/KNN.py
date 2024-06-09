@@ -6,6 +6,10 @@ import math
 
 
 class kNNClassifier:
+    def __init__(self, X, y, k=1):
+        self.X = X
+        self.y = y
+        self.k = k
 
     def KNN_Vn(self, X, k, t):
         '''
@@ -64,8 +68,9 @@ class kNNClassifier:
             KNN_indices = np.argsort(dist)[:k]
             KNN_labels = y_train[KNN_indices]
             d = dist[KNN_indices[-1]]
-            if d == 0:
-                d = 1e-5
+            if d <= 1e-2:
+                d = 1e-2
+            # print(X_train.shape[0] * alpha * (d ** X_train.shape[1]))
             class_probs = {
                 cls: np.sum(KNN_labels == cls) / (X_train.shape[0] * alpha * (d ** X_train.shape[1]))
                 for cls in np.unique(y_train)}
@@ -116,17 +121,17 @@ class kNNClassifier:
             res.append(class_probs)
         return res
 
-    def execute(self, X_train, y_train, X_test, k, typ=0):
-        yValueList = y_train.unique().tolist()
+    def execute(self, X_test, k, typ=0):
+        yValueList = self.y.unique().tolist()
         prior_prob = {}
         for y in yValueList:
-            prior_prob[y] = X_train[y_train == y].shape[0]
+            prior_prob[y] = self.X[self.y == y].shape[0]
         if typ == 0:
-            probs = self.kNN_Euler_Count(X_train, y_train, X_test.to_numpy(), k)
+            probs = self.kNN_Euler_Count(self.X, self.y, X_test.to_numpy(), k)
         elif typ == 1:
-            probs = self.kNN_Mahalanobis_Count(X_train, y_train, X_test.to_numpy(), k)
+            probs = self.kNN_Mahalanobis_Count(self.X, self.y, X_test.to_numpy(), k)
         elif typ == 2:
-            probs = self.kNN_Vn(X_train, y_train, X_test.to_numpy(), k)
+            probs = self.kNN_Vn(self.X, self.y, X_test.to_numpy(), k)
 
         predict = np.zeros(X_test.shape[0])
         # print(probs)
@@ -138,6 +143,9 @@ class kNNClassifier:
                     max_prob = current_prob
                     predict[i] = y
         return predict
+
+    def predict(self,X,k):
+        return self.execute(X,k)
 
     def density(self, X_train, y_train, X_test, k, typ=0):
         yValueList = y_train.unique().tolist()

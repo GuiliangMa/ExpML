@@ -1,0 +1,87 @@
+digraph {
+	"Root
+Divided By Cabin_G
+Gini=0.1679" [color=blue shape=box]
+	"Cabin_G <=0
+Divided By TicketPrefix_SWPP
+Gini=0.164" [color=blue shape=box]
+	"Root
+Divided By Cabin_G
+Gini=0.1679" -> "Cabin_G <=0
+Divided By TicketPrefix_SWPP
+Gini=0.164"
+	"TicketPrefix_SWPP <=0
+Divided By Title_Mr
+Gini=0.161" [color=blue shape=box]
+	"Cabin_G <=0
+Divided By TicketPrefix_SWPP
+Gini=0.164" -> "TicketPrefix_SWPP <=0
+Divided By Title_Mr
+Gini=0.161"
+	"Title_Mr <=0
+Divided By Cabin_A
+Gini=0.2639" [color=blue shape=box]
+	"TicketPrefix_SWPP <=0
+Divided By Title_Mr
+Gini=0.161" -> "Title_Mr <=0
+Divided By Cabin_A
+Gini=0.2639"
+	"Cabin_A <=0
+Divided By SibSp
+Gini=0.2539" [color=blue shape=box]
+	"Title_Mr <=0
+Divided By Cabin_A
+Gini=0.2639" -> "Cabin_A <=0
+Divided By SibSp
+Gini=0.2539"
+	"SibSp <=1
+0" [color=red]
+	"Cabin_A <=0
+Divided By SibSp
+Gini=0.2539" -> "SibSp <=1
+0"
+	"SibSp > 1
+0" [color=red]
+	"Cabin_A <=0
+Divided By SibSp
+Gini=0.2539" -> "SibSp > 1
+0"
+	"Cabin_A > 0
+1" [color=red]
+	"Title_Mr <=0
+Divided By Cabin_A
+Gini=0.2639" -> "Cabin_A > 0
+1"
+	"Title_Mr > 0
+Divided By Fare
+Gini=0.1244" [color=blue shape=box]
+	"TicketPrefix_SWPP <=0
+Divided By Title_Mr
+Gini=0.161" -> "Title_Mr > 0
+Divided By Fare
+Gini=0.1244"
+	"Fare <=263.0
+0" [color=red]
+	"Title_Mr > 0
+Divided By Fare
+Gini=0.1244" -> "Fare <=263.0
+0"
+	"Fare > 263.0
+1" [color=red]
+	"Title_Mr > 0
+Divided By Fare
+Gini=0.1244" -> "Fare > 263.0
+1"
+	"TicketPrefix_SWPP > 0
+1" [color=red]
+	"Cabin_G <=0
+Divided By TicketPrefix_SWPP
+Gini=0.164" -> "TicketPrefix_SWPP > 0
+1"
+	"Cabin_G > 0
+1" [color=red]
+	"Root
+Divided By Cabin_G
+Gini=0.1679" -> "Cabin_G > 0
+1"
+}

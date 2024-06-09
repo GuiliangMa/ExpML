@@ -21,7 +21,6 @@ class ID3Discrete:
         self.max_depth = max_depth
         self.tree = None
         self.result = None
-        self.cnt = 0
 
     def best_split(self, X, y):
         base_entropy = entropy(y)

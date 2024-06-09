@@ -2,6 +2,7 @@ import os
 import pickle
 import numpy as np
 import cv2 as cv
+import matplotlib.pyplot as plt
 
 from Exp4.codes.NNetwork import NeuralNetwork
 
@@ -40,10 +41,40 @@ images = images.astype(np.float32) / 255.0
 labels = to_one_hot(labels, 10)
 
 # np.random.seed(42)
-nn = NeuralNetwork(layers=[3072, 1024, 512, 256, 10],
-                   activations=['relu', 'relu', 'relu', 'softmax'],
+# nn = NeuralNetwork(layers=[3072, 128, 64, 10],
+#                    activations=['relu', 'relu', 'softmax'],
+#                    dropout_rate=0,
+#                    l2_lambda=0.01,
+#                    loss='cross_entropy')
+nn = NeuralNetwork(layers=[3072, 128,64,32, 10],
+                   activations=['relu','relu','relu', 'softmax'],
+                   dropout_rate=0,
+                   l2_lambda=0.01,
                    loss='cross_entropy')
-nn.train(images, labels, 30, 64, 0.01,patience=5, decay_factor=0.5)
+train_epochs = 10
+# nn.train(images, labels, train_epochs, 50000, 0.01, patience=5, decay_factor=0.1)
+nn.train(images, labels, train_epochs, 64, initial_lr=0.01, patience=100)
+
+loss_list = nn.loss_list
+
+with open(f'../result/test3_{train_epochs}.txt', 'w') as f:
+    for loss in loss_list:
+        f.write(f"{loss}\n")
+
+epochs = np.arange(0, len(loss_list))
+# 绘制损失函数折线图
+plt.figure(figsize=(20, 8))
+plt.plot(loss_list, label='Loss')
+plt.xlabel(f'Epochs={train_epochs}')
+plt.ylabel('Loss')
+plt.title('Loss Function Over Time')
+plt.legend()
+plt.grid(True)
+# 保存图像
+plt.xticks(epochs)
+plt.savefig(f'../pic/loss__iter{train_epochs}.png')
+# 显示图像
+plt.show()
 
 test_files = ['test_batch']
 test_images, test_labels = load_all_batches(data_dir, test_files)

@@ -90,7 +90,7 @@ for name, model in models.items():
     scores = cross_val_score(model, X_train_processed, y_train, cv=5, scoring='neg_mean_squared_error')
     model_scores[name] = scores.mean()
 
-print()
+print("================")
 # 输出每个模型的得分情况
 for name, score in model_scores.items():
     print(f"{name}: {score}")
@@ -111,6 +111,8 @@ y_test_pred_int = y_test_pred.astype(int) + 0.5
 
 # 准备结果
 results = pd.DataFrame({'PassengerId': test_passenger_ids, 'Predicted_Age': y_test_pred_int})
+
+print(results.head())
 
 # 保存结果到CSV文件
 results.to_csv(r'../data/forAge/predicted.csv', index=False)

@@ -1,0 +1,269 @@
+digraph {
+	"Root
+Divided By Sex_male
+Gini=0.3085" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.3732" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.3085" -> "Sex_male <=0
+Divided By Pclass_3
+Gini=0.3732"
+	"Pclass_3 <=0
+Divided By TicketPrefix_SOPP
+Gini=0.1696" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.3732" -> "Pclass_3 <=0
+Divided By TicketPrefix_SOPP
+Gini=0.1696"
+	"TicketPrefix_SOPP <=0
+Divided By Cabin_C
+Gini=0.1525" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By TicketPrefix_SOPP
+Gini=0.1696" -> "TicketPrefix_SOPP <=0
+Divided By Cabin_C
+Gini=0.1525"
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.0971" [color=blue shape=box]
+	"TicketPrefix_SOPP <=0
+Divided By Cabin_C
+Gini=0.1525" -> "Cabin_C <=0
+Divided By Fare
+Gini=0.0971"
+	"Fare <=26.0
+1" [color=red]
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.0971" -> "Fare <=26.0
+1"
+	"Fare > 26.0
+1" [color=red]
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.0971" -> "Fare > 26.0
+1"
+	"Cabin_C > 0
+Divided By Age
+Gini=0.3" [color=blue shape=box]
+	"TicketPrefix_SOPP <=0
+Divided By Cabin_C
+Gini=0.1525" -> "Cabin_C > 0
+Divided By Age
+Gini=0.3"
+	"Age <=37.5
+1" [color=red]
+	"Cabin_C > 0
+Divided By Age
+Gini=0.3" -> "Age <=37.5
+1"
+	"Age > 37.5
+0" [color=red]
+	"Cabin_C > 0
+Divided By Age
+Gini=0.3" -> "Age > 37.5
+0"
+	"TicketPrefix_SOPP > 0
+0" [color=red]
+	"Pclass_3 <=0
+Divided By TicketPrefix_SOPP
+Gini=0.1696" -> "TicketPrefix_SOPP > 0
+0"
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4053" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.3732" -> "Pclass_3 > 0
+Divided By Fare
+Gini=0.4053"
+	"Fare <=24.15
+Divided By Age
+Gini=0.466" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4053" -> "Fare <=24.15
+Divided By Age
+Gini=0.466"
+	"Age <=27.0
+Divided By Age
+Gini=0.4387" [color=blue shape=box]
+	"Fare <=24.15
+Divided By Age
+Gini=0.466" -> "Age <=27.0
+Divided By Age
+Gini=0.4387"
+	"Age <=23.0
+0" [color=red]
+	"Age <=27.0
+Divided By Age
+Gini=0.4387" -> "Age <=23.0
+0"
+	"Age > 23.0
+1" [color=red]
+	"Age <=27.0
+Divided By Age
+Gini=0.4387" -> "Age > 23.0
+1"
+	"Age > 27.0
+Divided By Age
+Gini=0.3041" [color=blue shape=box]
+	"Fare <=24.15
+Divided By Age
+Gini=0.466" -> "Age > 27.0
+Divided By Age
+Gini=0.3041"
+	"Age <=45.0
+0" [color=red]
+	"Age > 27.0
+Divided By Age
+Gini=0.3041" -> "Age <=45.0
+0"
+	"Age > 45.0
+1" [color=red]
+	"Age > 27.0
+Divided By Age
+Gini=0.3041" -> "Age > 45.0
+1"
+	"Fare > 24.15
+0" [color=red]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4053" -> "Fare > 24.15
+0"
+	"Sex_male > 0
+Divided By Age
+Gini=0.2302" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.3085" -> "Sex_male > 0
+Divided By Age
+Gini=0.2302"
+	"Age <=4.5
+Divided By SibSp
+Gini=0.1046" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Age
+Gini=0.2302" -> "Age <=4.5
+Divided By SibSp
+Gini=0.1046"
+	"SibSp <=2
+1" [color=red]
+	"Age <=4.5
+Divided By SibSp
+Gini=0.1046" -> "SibSp <=2
+1"
+	"SibSp > 2
+Divided By Fare
+Gini=0.1481" [color=blue shape=box]
+	"Age <=4.5
+Divided By SibSp
+Gini=0.1046" -> "SibSp > 2
+Divided By Fare
+Gini=0.1481"
+	"Fare <=31.275
+0" [color=red]
+	"SibSp > 2
+Divided By Fare
+Gini=0.1481" -> "Fare <=31.275
+0"
+	"Fare > 31.275
+0" [color=red]
+	"SibSp > 2
+Divided By Fare
+Gini=0.1481" -> "Fare > 31.275
+0"
+	"Age > 4.5
+Divided By TicketPrefix_STONO
+Gini=0.2118" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Age
+Gini=0.2302" -> "Age > 4.5
+Divided By TicketPrefix_STONO
+Gini=0.2118"
+	"TicketPrefix_STONO <=0
+Divided By Cabin_E
+Gini=0.1978" [color=blue shape=box]
+	"Age > 4.5
+Divided By TicketPrefix_STONO
+Gini=0.2118" -> "TicketPrefix_STONO <=0
+Divided By Cabin_E
+Gini=0.1978"
+	"Cabin_E <=0
+Divided By Age
+Gini=0.1843" [color=blue shape=box]
+	"TicketPrefix_STONO <=0
+Divided By Cabin_E
+Gini=0.1978" -> "Cabin_E <=0
+Divided By Age
+Gini=0.1843"
+	"Age <=74.0
+0" [color=red]
+	"Cabin_E <=0
+Divided By Age
+Gini=0.1843" -> "Age <=74.0
+0"
+	"Age > 74.0
+1" [color=red]
+	"Cabin_E <=0
+Divided By Age
+Gini=0.1843" -> "Age > 74.0
+1"
+	"Cabin_E > 0
+Divided By Age
+Gini=0.2597" [color=blue shape=box]
+	"TicketPrefix_STONO <=0
+Divided By Cabin_E
+Gini=0.1978" -> "Cabin_E > 0
+Divided By Age
+Gini=0.2597"
+	"Age <=36.0
+1" [color=red]
+	"Cabin_E > 0
+Divided By Age
+Gini=0.2597" -> "Age <=36.0
+1"
+	"Age > 36.0
+0" [color=red]
+	"Cabin_E > 0
+Divided By Age
+Gini=0.2597" -> "Age > 36.0
+0"
+	"TicketPrefix_STONO > 0
+Divided By Age
+Gini=0.3167" [color=blue shape=box]
+	"Age > 4.5
+Divided By TicketPrefix_STONO
+Gini=0.2118" -> "TicketPrefix_STONO > 0
+Divided By Age
+Gini=0.3167"
+	"Age <=21.0
+0" [color=red]
+	"TicketPrefix_STONO > 0
+Divided By Age
+Gini=0.3167" -> "Age <=21.0
+0"
+	"Age > 21.0
+Divided By Age
+Gini=0.2222" [color=blue shape=box]
+	"TicketPrefix_STONO > 0
+Divided By Age
+Gini=0.3167" -> "Age > 21.0
+Divided By Age
+Gini=0.2222"
+	"Age <=31.0
+1" [color=red]
+	"Age > 21.0
+Divided By Age
+Gini=0.2222" -> "Age <=31.0
+1"
+	"Age > 31.0
+1" [color=red]
+	"Age > 21.0
+Divided By Age
+Gini=0.2222" -> "Age > 31.0
+1"
+}

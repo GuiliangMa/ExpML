@@ -22,9 +22,6 @@ def relu_derivative(x):
     return (x > 0).astype(float)
 
 
-import numpy as np
-
-
 def softmax(x):
     x_max = np.max(x, axis=1, keepdims=True)
     e_x = np.exp(x - x_max)
@@ -52,7 +49,7 @@ def cross_entropy(y_true, y_pred):
     # Ensure numerical stability with a small constant epsilon
     epsilon = 1e-12
     y_pred = np.clip(y_pred, epsilon, 1. - epsilon)
-    return -np.sum(y_true * np.log(y_pred + 1e-9)+(1-y_true+1e-9)*np.log(1-y_pred+1e-9)) / y_true.shape[0]
+    return -np.sum(y_true * np.log(y_pred + 1e-9) + (1 - y_true + 1e-9) * np.log(1 - y_pred + 1e-9)) / y_true.shape[0]
 
 
 def cross_entropy_derivative(y_true, y_pred):
@@ -69,7 +66,8 @@ def cross_entropy_der_softmax(y_true, y_pred):
 
 
 class NeuralNetwork:
-    def __init__(self, layers, activations, loss='mse', l2_lambda=0.01):
+    def __init__(self, layers, activations, loss='mse', l2_lambda=0.01, dropout_rate=0,
+                 special_init = False):
         if len(activations) != len(layers) - 1:
             raise ValueError("Number of activations must be equal to number of layers - 1")
 
@@ -83,10 +81,28 @@ class NeuralNetwork:
         self.l2_lambda = l2_lambda
         self.d_weights = [None] * (len(self.layers) - 1)  # Initializing gradients of weights
         self.d_biases = [None] * (len(self.layers) - 1)  # Initializing gradients of biases
+        self.dropout_rate = dropout_rate
+        self.dropout_masks = []
+        self.loss_list = []
 
         for i in range(len(layers) - 1):
-            self.weights.append(np.random.randn(layers[i], layers[i + 1]) * 0.1)
-            self.biases.append(np.zeros((1, layers[i + 1])))
+            input_dim = self.layers[i]
+            output_dim = self.layers[i + 1]
+
+            if special_init:
+                # He initialization for ReLU
+                if activations[i] == 'relu':
+                    weight = np.random.randn(input_dim, output_dim) * np.sqrt(2 / input_dim)
+                # Xavier initialization for sigmoid and tanh
+                elif activations[i] in ['sigmoid', 'tanh']:
+                    weight = np.random.randn(input_dim, output_dim) * np.sqrt(2 / (input_dim + output_dim))
+                else:
+                    weight = np.random.randn(input_dim, output_dim) * 0.01
+            else:
+                weight = np.random.randn(input_dim, output_dim) * 0.1
+
+            self.weights.append(weight)
+            self.biases.append(np.zeros((1, output_dim)))
 
             activation, activation_derivative = self._get_activation(activations[i])
             self.activation_funcs.append(activation)
@@ -116,12 +132,21 @@ class NeuralNetwork:
             }
         return loss_functions.get(loss_name, (None, None))
 
-    def forward(self, x):
+    def forward(self, x, training=True):
         self.activations = [x]
         self.linearcombination = [x]
+        self.dropout_masks = []
         for w, b, activation_func in zip(self.weights, self.biases, self.activation_funcs):
             z = np.dot(self.activations[-1], w) + b
             a = activation_func(z)
+
+            if training and self.dropout_rate > 0:
+                mask = np.random.binomial(1, 1 - self.dropout_rate, size=a.shape) / (1 - self.dropout_rate)
+                a *= mask
+                self.dropout_masks.append(mask)
+            else:
+                self.dropout_masks.append(np.ones_like(a))
+
             self.linearcombination.append(z)
             self.activations.append(a)
         return self.activations[-1]
@@ -130,14 +155,17 @@ class NeuralNetwork:
         error = self.loss_derivative(y_true, self.activations[-1])
         for i in reversed(range(len(self.weights))):
             error *= self.activation_derivs[i](self.linearcombination[i + 1])
-            self.d_weights[i] = np.dot(self.activations[i].T, error)
+
+            if self.dropout_rate > 0:
+                error *= self.dropout_masks[i]
+
+            self.d_weights[i] = np.dot(self.activations[i].T, error) + self.l2_lambda * self.weights[i]
             self.d_biases[i] = np.sum(error, axis=0, keepdims=True)
             error = np.dot(error, self.weights[i].T)
 
     def update_weights(self, learning_rate):
         for i in range(len(self.weights)):
-            self.weights[i] -= learning_rate * (self.d_weights[i] + self.l2_lambda * self.weights[i])
-            # self.weights[i] -= learning_rate * (self.d_weights[i])
+            self.weights[i] -= learning_rate * (self.d_weights[i])
             self.biases[i] -= learning_rate * self.d_biases[i]
 
     def calculate_accuracy(self, y_true, y_pred):
@@ -148,14 +176,26 @@ class NeuralNetwork:
         accuracy = 100 * correct_predictions / len(y_true_labels)
         return accuracy
 
-    def train(self, X, y, epochs, batch_size, initial_lr, patience, decay_factor=0.5):
-        X_temp = X[:49000]
-        y_temp = y[:49000]
-        X_test = X[49000:]
-        y_test = y[49000:]
+    def train(self, X, y, epochs, batch_size, initial_lr, patience, decay_factor=0.5, task='Exp4', val_size=0.2):
+        if task == 'Exp4':
+            X_temp = X[:49000]
+            y_temp = y[:49000]
+            X_test = X[49000:]
+            y_test = y[49000:]
+        else:
+            val_len = int((1 - val_size) * X.shape[0])
+            X_temp = X[:val_len]
+            y_temp = y[:val_len]
+            X_test = X[val_len:]
+            y_test = y[val_len:]
 
         best_loss = float('inf')
         best_accuracy = 0.0
+
+        best_weight = None
+        best_biases = None
+        limit = 1e-7
+
         patience_counter = 0
         learning_rate = initial_lr
 
@@ -173,24 +213,43 @@ class NeuralNetwork:
                 if ((i / batch_size) + 1) % 100 == 0:
                     current_loss = self.loss_func(y_test, self.forward(X_test))
                     print(f"Epoch {epoch + 1}, Batch {int((i / batch_size) + 1)}, Loss = {current_loss}")
-            current_loss = self.loss_func(y, self.forward(X))
+
+            current_loss = self.loss_func(y, self.forward(X,training=False))
+            self.loss_list.append(current_loss)
             print(f"Epoch {epoch + 1}, Loss: {current_loss}")
             y_pred = self.predict(X_test)
-            test_accuracy = self.calculate_accuracy(y_test, y_pred)
-            print(f"Epoch {epoch + 1}, Validation Accuracy: {test_accuracy:.2f}%")
 
-            # Check for improvement
+            current_accuracy = self.calculate_accuracy(y_test, y_pred)
+            print(f"Epoch {epoch + 1}, Validation Accuracy: {current_accuracy:.2f}%")
+
+            # Check for improvement By Loss
             if current_loss < best_loss:
                 best_loss = current_loss
+                best_weight = self.weights
+                best_biases = self.biases
                 patience_counter = 0
             else:
                 patience_counter += 1
 
+            # # Check for improvement By Acc
+            # if current_accuracy >= best_accuracy:
+            #     best_accuracy = current_accuracy
+            #     best_weight = self.weights
+            #     best_biases = self.biases
+            #     patience_counter = 0
+            # else:
+            #     patience_counter += 1
+
             # Adjust learning rate if patience is exceeded
             if patience_counter >= patience:
                 learning_rate *= decay_factor
+                if learning_rate < limit:
+                    learning_rate = 1e-4
+                    limit *= 0.1
+                self.weights = best_weight
+                self.biases = best_biases
                 patience_counter = 0
-                print(f"Learning rate reduced to {learning_rate}")
+                print(f"#########\n Learning rate reduced to {learning_rate} \n#########")
 
         y_pred = self.predict(X_test)
         test_accuracy = self.calculate_accuracy(y_test, y_pred)
@@ -198,7 +257,8 @@ class NeuralNetwork:
 
     def predict(self, x):
         # 进行前向传播得到预测结果
-        predictions = self.forward(x)
+        predictions = self.forward(x,training=False)
+        # print(predictions)
         return np.argmax(predictions, axis=1)
 
 
@@ -237,13 +297,14 @@ if __name__ == "__main__":
     labels = to_one_hot(labels, 10)
 
     # np.random.seed(42)
-    nn = NeuralNetwork(layers=[3072, 1024,10],
+
+    nn = NeuralNetwork(layers=[3072, 1024, 10],
                        activations=['relu', 'softmax'],
                        loss='cross_entropy')
-    nn.train(images, labels, 30, 64, 0.01,patience=5, decay_factor=0.5)
+    nn.train(images, labels, 30, 64, 0.01, patience=5, decay_factor=0.5)
 
     test_files = ['test_batch']
-    test_images,test_labels = load_all_batches(data_dir, test_files)
+    test_images, test_labels = load_all_batches(data_dir, test_files)
     test_images = test_images.astype(np.float32) / 255.0
     test_labels = to_one_hot(test_labels, 10)
     test_pred = nn.predict(test_images)

@@ -1,0 +1,185 @@
+digraph {
+	"Root
+Divided By Sex_male
+Gini=0.279" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4181" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.279" -> "Sex_male <=0
+Divided By Pclass_3
+Gini=0.4181"
+	"Pclass_3 <=0
+Divided By Age
+Gini=0.2345" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4181" -> "Pclass_3 <=0
+Divided By Age
+Gini=0.2345"
+	"Age <=56.0
+Divided By Cabin_C
+Gini=0.2133" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By Age
+Gini=0.2345" -> "Age <=56.0
+Divided By Cabin_C
+Gini=0.2133"
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.1457" [color=blue shape=box]
+	"Age <=56.0
+Divided By Cabin_C
+Gini=0.2133" -> "Cabin_C <=0
+Divided By Fare
+Gini=0.1457"
+	"Fare <=26.0
+1" [color=red]
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.1457" -> "Fare <=26.0
+1"
+	"Fare > 26.0
+1" [color=red]
+	"Cabin_C <=0
+Divided By Fare
+Gini=0.1457" -> "Fare > 26.0
+1"
+	"Cabin_C > 0
+Divided By Age
+Gini=0.25" [color=blue shape=box]
+	"Age <=56.0
+Divided By Cabin_C
+Gini=0.2133" -> "Cabin_C > 0
+Divided By Age
+Gini=0.25"
+	"Age <=25.0
+0" [color=red]
+	"Cabin_C > 0
+Divided By Age
+Gini=0.25" -> "Age <=25.0
+0"
+	"Age > 25.0
+1" [color=red]
+	"Cabin_C > 0
+Divided By Age
+Gini=0.25" -> "Age > 25.0
+1"
+	"Age > 56.0
+0" [color=red]
+	"Pclass_3 <=0
+Divided By Age
+Gini=0.2345" -> "Age > 56.0
+0"
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4171" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4181" -> "Pclass_3 > 0
+Divided By Fare
+Gini=0.4171"
+	"Fare <=24.15
+0" [color=red]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4171" -> "Fare <=24.15
+0"
+	"Fare > 24.15
+Divided By Age
+Gini=0.0702" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4171" -> "Fare > 24.15
+Divided By Age
+Gini=0.0702"
+	"Age <=5.0
+0" [color=red]
+	"Fare > 24.15
+Divided By Age
+Gini=0.0702" -> "Age <=5.0
+0"
+	"Age > 5.0
+0" [color=red]
+	"Fare > 24.15
+Divided By Age
+Gini=0.0702" -> "Age > 5.0
+0"
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2157" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.279" -> "Sex_male > 0
+Divided By Fare
+Gini=0.2157"
+	"Fare <=50.4958
+0" [color=red]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2157" -> "Fare <=50.4958
+0"
+	"Fare > 50.4958
+Divided By TicketPrefix_Unknown
+Gini=0.309" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2157" -> "Fare > 50.4958
+Divided By TicketPrefix_Unknown
+Gini=0.309"
+	"TicketPrefix_Unknown <=0
+Divided By Cabin_D
+Gini=0.0" [color=blue shape=box]
+	"Fare > 50.4958
+Divided By TicketPrefix_Unknown
+Gini=0.309" -> "TicketPrefix_Unknown <=0
+Divided By Cabin_D
+Gini=0.0"
+	"Cabin_D <=0
+0" [color=red]
+	"TicketPrefix_Unknown <=0
+Divided By Cabin_D
+Gini=0.0" -> "Cabin_D <=0
+0"
+	"Cabin_D > 0
+1" [color=red]
+	"TicketPrefix_Unknown <=0
+Divided By Cabin_D
+Gini=0.0" -> "Cabin_D > 0
+1"
+	"TicketPrefix_Unknown > 0
+Divided By Cabin_B
+Gini=0.3333" [color=blue shape=box]
+	"Fare > 50.4958
+Divided By TicketPrefix_Unknown
+Gini=0.309" -> "TicketPrefix_Unknown > 0
+Divided By Cabin_B
+Gini=0.3333"
+	"Cabin_B <=0
+Divided By Pclass_3
+Gini=0.3561" [color=blue shape=box]
+	"TicketPrefix_Unknown > 0
+Divided By Cabin_B
+Gini=0.3333" -> "Cabin_B <=0
+Divided By Pclass_3
+Gini=0.3561"
+	"Pclass_3 <=0
+0" [color=red]
+	"Cabin_B <=0
+Divided By Pclass_3
+Gini=0.3561" -> "Pclass_3 <=0
+0"
+	"Pclass_3 > 0
+1" [color=red]
+	"Cabin_B <=0
+Divided By Pclass_3
+Gini=0.3561" -> "Pclass_3 > 0
+1"
+	"Cabin_B > 0
+1" [color=red]
+	"TicketPrefix_Unknown > 0
+Divided By Cabin_B
+Gini=0.3333" -> "Cabin_B > 0
+1"
+}

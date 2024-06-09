@@ -1,13 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from SplitData import splitForData
 from graphviz import Digraph
 from IPython.display import Image, display
 
 
 class CART:
-    def __init__(self, max_depth=None, min_samples_split=1, max_gini=1):
+
+    @staticmethod
+    def splitForData(data, test_size, target, random_state=42):
+        np.random.seed(random_state)
+        data_shuffled = data.sample(frac=1).reset_index(drop=True)
+        train_size = int((1 - test_size) * len(data))
+        train_data = data_shuffled[:train_size]
+        test_data = data_shuffled[train_size:]
+        X_train = train_data.drop(target, axis=1)
+        y_train = train_data[target]
+        X_test = test_data.drop(target, axis=1)
+        y_test = test_data[target]
+        return X_train, y_train, X_test, y_test
+
+    def __init__(self, max_depth=None, min_samples_split=2, max_gini=1):
         self.tree = None
         self.result = None
 
@@ -106,12 +119,16 @@ class CART:
         if len(np.unique(y)) == 1:
             return {'type': 'leaf', 'class': self.result[np.unique(y)[0]]}
 
-        # if self.max_depth and depth > self.max_depth:
-        #     return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
-        #
-        # # 预剪枝
-        # if len(y) < self.min_samples_split:
-        #     return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
+        if self.max_depth and depth > self.max_depth:
+            if len(y) == 0:
+                return {'type': 'leaf', 'class': self.result[0]}
+            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
+
+        # 预剪枝
+        if len(y) < self.min_samples_split:
+            if len(y) == 0:
+                return {'type': 'leaf', 'class': self.result[0]}
+            return {'type': 'leaf', 'class': self.result[np.bincount(y).argmax()]}
 
         best_feature, best_threshold, best_gini = self.best_split(X, y)
 
@@ -226,10 +243,39 @@ class CART:
         dot = add_nodes_edges(self.tree)
         return dot
 
+    def predict_and_plot(self,X,dot):
+        def add_nodes_edges(X,tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+            if tree['type'] == 'leaf':
+                if edge_label is not None:
+                    node_name = f"{feature_name} {edge_label}\n{str(tree['class'])}"
+                else:
+                    node_name = str(tree)
+                dot.node(node_name, color="red", style='filled', fillcolor='yellow')
+
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} {edge_label}\nDivided By {tree['feature']}\nGini={round(tree['gini'], 4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['feature']}\nGini={round(tree['gini'], 4)}"
+                dot.node(node_name, color="blue", shape='box', style='filled', fillcolor='yellow')
+
+                if 'left' in tree and X[tree['feature']] <= tree['threshold']:
+                    add_nodes_edges(X,tree['left'], dot=dot, parent_name=node_name,
+                                    edge_label="<=" + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+                if 'right' in tree and X[tree['feature']] > tree['threshold']:
+                    add_nodes_edges(X,tree['right'], dot=dot, parent_name=node_name,
+                                    edge_label="> " + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+            return dot
+
+        dot = add_nodes_edges(X,self.tree,dot)
+        return dot
+
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
-    X_train, y_train, X_test, y_test = splitForData(df, 0.2, 'Species', random_state=227)
+    X_train, y_train, X_test, y_test = CART.splitForData(df, 0.2, 'Species', random_state=227)
 
     tree = CART(max_depth=10)
     val_accuracy = tree.fit(X_train, y_train)
@@ -240,6 +286,11 @@ if __name__ == '__main__':
     print(f"Accuracy: {accuracy:.2f}")
 
     dot = tree.plot_tree()
+
+    # X_predict = df.iloc[120, :]
+    # print(X_predict)
+    # dot = tree.predict_and_plot(X_predict, dot)
+
     dot.render("../pic/CART/CART_EarlyPrune", format='png')
     image = Image(filename="../pic/CART/CART_EarlyPrune.png")
     display(image)

@@ -1,0 +1,269 @@
+digraph {
+	"Root
+Divided By Sex_male
+Gini=0.2499" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4168" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.2499" -> "Sex_male <=0
+Divided By Pclass_3
+Gini=0.4168"
+	"Pclass_3 <=0
+Divided By SibSp
+Gini=0.3429" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4168" -> "Pclass_3 <=0
+Divided By SibSp
+Gini=0.3429"
+	"SibSp <=-0.4789037285092167
+Divided By Age
+Gini=0.1429" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By SibSp
+Gini=0.3429" -> "SibSp <=-0.4789037285092167
+Divided By Age
+Gini=0.1429"
+	"Age <=0.4706115539257303
+1" [color=red]
+	"SibSp <=-0.4789037285092167
+Divided By Age
+Gini=0.1429" -> "Age <=0.4706115539257303
+1"
+	"Age > 0.4706115539257303
+Divided By Age
+Gini=0.25" [color=blue shape=box]
+	"SibSp <=-0.4789037285092167
+Divided By Age
+Gini=0.1429" -> "Age > 0.4706115539257303
+Divided By Age
+Gini=0.25"
+	"Age <=0.6201184662364517
+0" [color=red]
+	"Age > 0.4706115539257303
+Divided By Age
+Gini=0.25" -> "Age <=0.6201184662364517
+0"
+	"Age > 0.6201184662364517
+1" [color=red]
+	"Age > 0.4706115539257303
+Divided By Age
+Gini=0.25" -> "Age > 0.6201184662364517
+1"
+	"SibSp > -0.4789037285092167
+Divided By TicketNumLen
+Gini=0.2143" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By SibSp
+Gini=0.3429" -> "SibSp > -0.4789037285092167
+Divided By TicketNumLen
+Gini=0.2143"
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.1667" [color=blue shape=box]
+	"SibSp > -0.4789037285092167
+Divided By TicketNumLen
+Gini=0.2143" -> "TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.1667"
+	"Fare <=-0.2373546513547208
+0" [color=red]
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.1667" -> "Fare <=-0.2373546513547208
+0"
+	"Fare > -0.2373546513547208
+1" [color=red]
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.1667" -> "Fare > -0.2373546513547208
+1"
+	"TicketNumLen > -0.3413324323690535
+0" [color=red]
+	"SibSp > -0.4789037285092167
+Divided By TicketNumLen
+Gini=0.2143" -> "TicketNumLen > -0.3413324323690535
+0"
+	"Pclass_3 > 0
+Divided By Parch
+Gini=0.3671" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4168" -> "Pclass_3 > 0
+Divided By Parch
+Gini=0.3671"
+	"Parch <=0.7104915504396963
+Divided By Age
+Gini=0.4219" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Parch
+Gini=0.3671" -> "Parch <=0.7104915504396963
+Divided By Age
+Gini=0.4219"
+	"Age <=1.2928995716346976
+Divided By Age
+Gini=0.4004" [color=blue shape=box]
+	"Parch <=0.7104915504396963
+Divided By Age
+Gini=0.4219" -> "Age <=1.2928995716346976
+Divided By Age
+Gini=0.4004"
+	"Age <=-0.0152859110841139
+0" [color=red]
+	"Age <=1.2928995716346976
+Divided By Age
+Gini=0.4004" -> "Age <=-0.0152859110841139
+0"
+	"Age > -0.0152859110841139
+0" [color=red]
+	"Age <=1.2928995716346976
+Divided By Age
+Gini=0.4004" -> "Age > -0.0152859110841139
+0"
+	"Age > 1.2928995716346976
+1" [color=red]
+	"Parch <=0.7104915504396963
+Divided By Age
+Gini=0.4219" -> "Age > 1.2928995716346976
+1"
+	"Parch > 0.7104915504396963
+0" [color=red]
+	"Pclass_3 > 0
+Divided By Parch
+Gini=0.3671" -> "Parch > 0.7104915504396963
+0"
+	"Sex_male > 0
+Divided By Fare
+Gini=0.1933" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.2499" -> "Sex_male > 0
+Divided By Fare
+Gini=0.1933"
+	"Fare <=-0.0692110907874974
+Divided By Pclass_3
+Gini=0.1615" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.1933" -> "Fare <=-0.0692110907874974
+Divided By Pclass_3
+Gini=0.1615"
+	"Pclass_3 <=0
+Divided By Cabin_D
+Gini=0.0598" [color=blue shape=box]
+	"Fare <=-0.0692110907874974
+Divided By Pclass_3
+Gini=0.1615" -> "Pclass_3 <=0
+Divided By Cabin_D
+Gini=0.0598"
+	"Cabin_D <=0
+Divided By Age
+Gini=0.0472" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By Cabin_D
+Gini=0.0598" -> "Cabin_D <=0
+Divided By Age
+Gini=0.0472"
+	"Age <=0.1715977293042876
+0" [color=red]
+	"Cabin_D <=0
+Divided By Age
+Gini=0.0472" -> "Age <=0.1715977293042876
+0"
+	"Age > 0.1715977293042876
+0" [color=red]
+	"Cabin_D <=0
+Divided By Age
+Gini=0.0472" -> "Age > 0.1715977293042876
+0"
+	"Cabin_D > 0
+0" [color=red]
+	"Pclass_3 <=0
+Divided By Cabin_D
+Gini=0.0598" -> "Cabin_D > 0
+0"
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.1926" [color=blue shape=box]
+	"Fare <=-0.0692110907874974
+Divided By Pclass_3
+Gini=0.1615" -> "Pclass_3 > 0
+Divided By Age
+Gini=0.1926"
+	"Age <=0.993885747013255
+Divided By Age
+Gini=0.1779" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.1926" -> "Age <=0.993885747013255
+Divided By Age
+Gini=0.1779"
+	"Age <=-0.0526626391617943
+0" [color=red]
+	"Age <=0.993885747013255
+Divided By Age
+Gini=0.1779" -> "Age <=-0.0526626391617943
+0"
+	"Age > -0.0526626391617943
+0" [color=red]
+	"Age <=0.993885747013255
+Divided By Age
+Gini=0.1779" -> "Age > -0.0526626391617943
+0"
+	"Age > 0.993885747013255
+0" [color=red]
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.1926" -> "Age > 0.993885747013255
+0"
+	"Fare > -0.0692110907874974
+Divided By Title_Major
+Gini=0.2942" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.1933" -> "Fare > -0.0692110907874974
+Divided By Title_Major
+Gini=0.2942"
+	"Title_Major <=0
+Divided By SibSp
+Gini=0.2863" [color=blue shape=box]
+	"Fare > -0.0692110907874974
+Divided By Title_Major
+Gini=0.2942" -> "Title_Major <=0
+Divided By SibSp
+Gini=0.2863"
+	"SibSp <=0.4811038987780187
+Divided By Pclass_3
+Gini=0.3113" [color=blue shape=box]
+	"Title_Major <=0
+Divided By SibSp
+Gini=0.2863" -> "SibSp <=0.4811038987780187
+Divided By Pclass_3
+Gini=0.3113"
+	"Pclass_3 <=0
+0" [color=red]
+	"SibSp <=0.4811038987780187
+Divided By Pclass_3
+Gini=0.3113" -> "Pclass_3 <=0
+0"
+	"Pclass_3 > 0
+1" [color=red]
+	"SibSp <=0.4811038987780187
+Divided By Pclass_3
+Gini=0.3113" -> "Pclass_3 > 0
+1"
+	"SibSp > 0.4811038987780187
+0" [color=red]
+	"Title_Major <=0
+Divided By SibSp
+Gini=0.2863" -> "SibSp > 0.4811038987780187
+0"
+	"Title_Major > 0
+1" [color=red]
+	"Fare > -0.0692110907874974
+Divided By Title_Major
+Gini=0.2942" -> "Title_Major > 0
+1"
+}

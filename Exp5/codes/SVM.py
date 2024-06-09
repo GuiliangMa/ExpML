@@ -36,73 +36,7 @@ class SVM:
         self.C = C
         self.stategy = None
 
-    def compute_error(self, i, X, y):
-        """计算第i个数据点的预测误差"""
-        f_x = np.dot(self.Lambda.T * y.T, X @ X[i].T) + self.bias
-        return f_x - y[i]
-
-    def select_j(self, i, E_i, X, y):
-        """选择第二个乘子的索引"""
-        valid_indices = [j for j in range(X.shape[0]) if j != i]
-        j = max(valid_indices, key=lambda x: abs(E_i - self.compute_error(x, X, y)))
-        return j
-
-    def choose_lambda_pair(self, i, X, y, tol):
-        """选择一对拉格朗日乘子进行优化，以i为起始乘子"""
-        num_changed = 0
-        E_i = self.compute_error(i, X, y)
-        if ((y[i] * E_i < -tol and self.Lambda[i] < self.C) or
-                (y[i] * E_i > tol and self.Lambda[i] > 0)):
-            # 选择第二个乘子
-            j = self.select_j(i, E_i, X, y)
-            E_j = self.compute_error(j, X, y)
-
-            # 保存旧的alphas
-            Lambda_i_old = self.Lambda[i].copy()
-            Lambda_j_old = self.Lambda[j].copy()
-
-            # 计算剪辑边界
-            if y[i] != y[j]:
-                L = max(0, self.Lambda[j] - self.Lambda[i])
-                H = min(self.C, self.C + self.Lambda[j] - self.Lambda[i])
-            else:
-                L = max(0, self.Lambda[i] + self.Lambda[j] - self.C)
-                H = min(self.C, self.Lambda[i] + self.Lambda[j])
-
-            if L == H:
-                return 0
-
-            # 计算eta
-            eta = 2 * np.dot(X[i], X[j].T) - np.dot(X[i], X[i].T) - np.dot(X[j], X[j].T)
-            if eta >= 0:
-                return 0
-
-            # 更新alpha_j
-            self.Lambda[j] -= y[j] * (E_i - E_j) / eta
-            self.Lambda[j] = np.clip(self.Lambda[j], L, H)
-
-            if abs(self.Lambda[j] - Lambda_j_old) < 1e-5:
-                return 0
-
-            # 更新alpha_i
-            self.Lambda[i] += y[i] * y[j] * (Lambda_j_old - self.Lambda[j])
-
-            # 更新阈值b
-            b1 = self.bias - E_i - y[i] * (self.Lambda[i] - Lambda_i_old) * np.dot(X[i], X[i].T) - y[j] * (
-                    self.Lambda[j] - Lambda_j_old) * np.dot(X[i], X[j].T)
-            b2 = self.bias - E_j - y[i] * (self.Lambda[i] - Lambda_i_old) * np.dot(X[i], X[j].T) - y[j] * (
-                    self.Lambda[j] - Lambda_j_old) * np.dot(X[j], X[j].T)
-            if 0 < self.Lambda[i] < self.C:
-                self.bias = b1
-            elif 0 < self.Lambda[j] < self.C:
-                self.bias = b2
-            else:
-                self.bias = (b1 + b2) / 2
-
-            num_changed = 1
-        return num_changed
-
-    def fitBySMO(self, X, label, C=1.0, margin='soft', kernel='none', gamma=10, tolerance=1e-6):
+    def fitBySMO(self, X, label, C=1.0, margin='soft', kernel='none', gamma=10, tolerance=1e-6, max_iter=1000):
         self.trained = True
         self.kernel = kernel
         self.gamma = gamma
@@ -115,28 +49,35 @@ class SVM:
         self.Lambda = np.zeros((n_samples, 1))
         self.bias = 0
 
-        def compute_kernel(x1, x2):
-            if self.kernel == 'none':
-                return np.dot(x1, x2.T)
-            elif self.kernel == 'rbf':
-                return rbf_kernel(x1,x2,gamma)
-            else:
-                return np.dot(x1, x2.T)  # 默认使用线性核
+        # 缓存核计算结果
+        if self.kernel == 'none':
+            K = np.dot(X, X.T)
+        elif self.kernel == 'rbf':
+            K = rbf_kernel(X, X, gamma=self.gamma)
+        else:
+            K = np.dot(X, X.T)  # 默认使用线性核
 
         def compute_error(i):
-            fx_i = np.dot((self.Lambda * y).T, compute_kernel(X, X[i])) + self.bias
+            fx_i = np.dot((self.Lambda * y).T, K[:, i]) + self.bias
             E_i = fx_i - y[i]
             return E_i
 
-        def choose_alpha_pair(i):
-            E_i = compute_error(i)
-            if (y[i] * E_i < -tolerance and self.Lambda[i] < C) or (y[i] * E_i > tolerance and self.Lambda[i] > 0):
+        def choose_alpha_pair(i, E_i):
+            non_bound_indices = np.where((self.Lambda > 0) & (self.Lambda < C))[0]
+            if len(non_bound_indices) > 1:
+                if E_i > 0:
+                    j = np.argmin([compute_error(k) for k in non_bound_indices])
+                else:
+                    j = np.argmax([compute_error(k) for k in non_bound_indices])
+                j = non_bound_indices[j]
+                return j
+            else:
                 j = np.random.choice(list(set(range(n_samples)) - {i}))
-                E_j = compute_error(j)
-                return i, j, E_i, E_j
-            return i, None, E_i, None
+                return j
 
-        def update_alpha_pair(i, j, E_i, E_j):
+        def update_alpha_pair(i, j):
+            E_i = compute_error(i)
+            E_j = compute_error(j)
             alpha_i_old = self.Lambda[i].copy()
             alpha_j_old = self.Lambda[j].copy()
 
@@ -150,7 +91,7 @@ class SVM:
             if L == H:
                 return False
 
-            eta = 2 * compute_kernel(X[i], X[j]) - compute_kernel(X[i], X[i]) - compute_kernel(X[j], X[j])
+            eta = 2 * K[i, j] - K[i, i] - K[j, j]
             if eta >= 0:
                 return False
 
@@ -159,46 +100,37 @@ class SVM:
 
             self.Lambda[i] += y[i] * y[j] * (alpha_j_old - self.Lambda[j])
 
-            b1 = self.bias - E_i - y[i] * (self.Lambda[i] - alpha_i_old) * compute_kernel(X[i], X[i]) \
-                 - y[j] * (self.Lambda[j] - alpha_j_old) * compute_kernel(X[i], X[j])
-            b2 = self.bias - E_j - y[i] * (self.Lambda[i] - alpha_i_old) * compute_kernel(X[i], X[j]) \
-                 - y[j] * (self.Lambda[j] - alpha_j_old) * compute_kernel(X[j], X[j])
+            b1 = self.bias - E_i - y[i] * (self.Lambda[i] - alpha_i_old) * K[i, i] - y[j] * (
+                    self.Lambda[j] - alpha_j_old) * K[i, j]
+            b2 = self.bias - E_j - y[i] * (self.Lambda[i] - alpha_i_old) * K[i, j] - y[j] * (
+                    self.Lambda[j] - alpha_j_old) * K[j, j]
 
-            self.bias = (b1 + b2) / 2
+            if 0 < self.Lambda[i] < C:
+                self.bias = b1
+            elif 0 < self.Lambda[j] < C:
+                self.bias = b2
+            else:
+                self.bias = (b1 + b2) / 2
             return True
 
-        num_changed = 0
-        examine_all = True
-        while num_changed > 0 or examine_all:
+        iteration = 0
+        while iteration < max_iter:
             num_changed = 0
-            if examine_all:
-                for i in range(n_samples):
-                    _, j, E_i, E_j = choose_alpha_pair(i)
-                    if j is not None:
-                        if update_alpha_pair(i, j, E_i, E_j):
-                            num_changed += 1
-            else:
-                for i in range(n_samples):
-                    if 0 < self.Lambda[i] < C:
-                        _, j, E_i, E_j = choose_alpha_pair(i)
-                        if j is not None:
-                            if update_alpha_pair(i, j, E_i, E_j):
-                                num_changed += 1
-            examine_all = (examine_all == False)
+            for i in range(n_samples):
+                E_i = compute_error(i)
+                if (y[i] * E_i < -tolerance and self.Lambda[i] < C) or (y[i] * E_i > tolerance and self.Lambda[i] > 0):
+                    j = choose_alpha_pair(i, E_i)
+                    if update_alpha_pair(i, j):
+                        num_changed += 1
+            if num_changed == 0:
+                break
+            iteration += 1
 
-        sv_X = []
-        sv_y = []
-        sv_lambda = []
-        for index, lambda_i in enumerate(self.Lambda):
-            print(lambda_i)
-            if lambda_i > 1e-5:
-                sv_lambda.append(lambda_i)
-                sv_X.append(X[index])
-                sv_y.append(y[index])
-        self.Lambda = np.array(sv_lambda)
-        self.sv_X = np.array(sv_X)
-        self.sv_y = np.array(sv_y)
-        # print(self.sv_X)
+        sv_indices = np.where(self.Lambda > 1e-5)[0]
+        self.sv_X = X[sv_indices]
+        self.sv_y = y[sv_indices]
+        self.Lambda = self.Lambda[sv_indices]
+
         return self.sv_X
 
     def fitByStd(self, X, label, margin='soft', kernel='none', gamma=10):
@@ -261,7 +193,6 @@ class SVM:
             if self.kernel == 'rbf':
                 temp_y += self.Lambda[i] * sv_y[i] * rbf_kernel(sv_X, sv_X[i].T, gamma).reshape(-1, 1)
         self.bias = np.mean(sv_y - temp_y)
-        print(self.bias)
         return self.sv_X
 
     def fitByGradDescent(self, X, label, margin='soft', iters=10000, learning_rate=0.00001, kernel='none'):
@@ -324,7 +255,7 @@ class SVM:
         if strategy == 'smo':
             if margin == 'hard':
                 self.C = 10000
-            return self.fitBySMO(X, y, self.C, margin, kernel, gamma, tolerance)
+            return self.fitBySMO(X, y, self.C, margin, kernel, gamma, tolerance, max_iter=iters)
 
     def predict(self, X):
         if self.stategy == "grad":
@@ -342,7 +273,7 @@ class SVM:
 
 
 if __name__ == "__main__":
-    data = scipy.io.loadmat('../data/ex5data1.mat')
+    data = scipy.io.loadmat('../data/ex5data2.mat')
     X = pd.DataFrame(data['X'], columns=['x1', 'x2'])
     y = pd.DataFrame(data['y'], columns=['y'])
     X_true = X[y['y'] == 1]
@@ -354,8 +285,10 @@ if __name__ == "__main__":
     # plt.legend()
     # plt.show()
 
-    model = SVM(C=1)
-    sv_X = model.fit(X, y, 'smo', margin='hard',kernel='rbf')
+    filename = '../pic/data2_smo_rbf_soft_C1000.png'
+    title = 'With SMO , Soft Margin , rbf , C = 1000'
+    model = SVM(C=1000)
+    sv_X = model.fit(X, y, 'smo', margin='soft', kernel='rbf')
     # exit(0)
 
     x_min, x_max = X['x1'].min(), X['x1'].max()
@@ -386,4 +319,9 @@ if __name__ == "__main__":
     plt.contourf(x0, x1, z_label, cmap=custom_cmap2)
     plt.contour(x0, x1, z, levels=[-1, 0, 1], linestyles=['--', '-', '--'], cmap=custom_cmap)
     plt.axis([x_min, x_max, y_min, y_max])
+    plt.title(title)
+    plt.legend(loc='best')
+
+    plt.savefig(filename)
+
     plt.show()

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 
 
@@ -43,7 +44,8 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    epochs = 30
+    epochs = 10
+    epoch_losses = []
 
     for epoch in range(epochs):
         running_loss = 0.0
@@ -59,7 +61,17 @@ if __name__ == '__main__':
             if i % 200 == 199:
                 print(f'Epoch {epoch + 1}, Batch {i + 1}, Loss: {running_loss / 200:.4f}')
                 running_loss = 0.0
-        print('Finished Training')
+        print(f'Finished Training Epoch {epoch + 1}')
+        epoch_loss = running_loss / len(trainLoader)
+        epoch_losses.append(epoch_loss)
+
+    plt.figure()
+    plt.plot(range(1, epochs + 1), epoch_losses, marker='o')
+    plt.title('Training Loss per Epoch')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid()
+    plt.show()
 
     total = 0
     correct = 0
@@ -73,9 +85,3 @@ if __name__ == '__main__':
             correct += (predicted == labels).sum().item()
 
     print(f'Accuracy of the network on the 10000 test images: {100 * correct / total:.2f}%')
-
-
-
-
-# print(torch.cuda.is_available())
-# print(torch.cuda.device_count())

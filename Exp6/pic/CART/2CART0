@@ -1,0 +1,269 @@
+digraph {
+	"Root
+Divided By Sex_male
+Gini=0.299" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.282" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.299" -> "Sex_male <=0
+Divided By Pclass_3
+Gini=0.282"
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.0739" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.282" -> "Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.0739"
+	"TicketNumLen <=-4.459343068047307
+0" [color=red]
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.0739" -> "TicketNumLen <=-4.459343068047307
+0"
+	"TicketNumLen > -4.459343068047307
+Divided By Fare
+Gini=0.0683" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.0739" -> "TicketNumLen > -4.459343068047307
+Divided By Fare
+Gini=0.0683"
+	"Fare <=-0.1407204211436729
+Divided By TicketNumLen
+Gini=0.1681" [color=blue shape=box]
+	"TicketNumLen > -4.459343068047307
+Divided By Fare
+Gini=0.0683" -> "Fare <=-0.1407204211436729
+Divided By TicketNumLen
+Gini=0.1681"
+	"TicketNumLen <=-0.3413324323690535
+1" [color=red]
+	"Fare <=-0.1407204211436729
+Divided By TicketNumLen
+Gini=0.1681" -> "TicketNumLen <=-0.3413324323690535
+1"
+	"TicketNumLen > -0.3413324323690535
+1" [color=red]
+	"Fare <=-0.1407204211436729
+Divided By TicketNumLen
+Gini=0.1681" -> "TicketNumLen > -0.3413324323690535
+1"
+	"Fare > -0.1407204211436729
+1" [color=red]
+	"TicketNumLen > -4.459343068047307
+Divided By Fare
+Gini=0.0683" -> "Fare > -0.1407204211436729
+1"
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4127" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.282" -> "Pclass_3 > 0
+Divided By Fare
+Gini=0.4127"
+	"Fare <=-0.2111029963755875
+Divided By Age
+Gini=0.4127" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4127" -> "Fare <=-0.2111029963755875
+Divided By Age
+Gini=0.4127"
+	"Age <=0.3958580977703697
+Divided By Age
+Gini=0.4129" [color=blue shape=box]
+	"Fare <=-0.2111029963755875
+Divided By Age
+Gini=0.4127" -> "Age <=0.3958580977703697
+Divided By Age
+Gini=0.4129"
+	"Age <=-1.7346154026574094
+1" [color=red]
+	"Age <=0.3958580977703697
+Divided By Age
+Gini=0.4129" -> "Age <=-1.7346154026574094
+1"
+	"Age > -1.7346154026574094
+1" [color=red]
+	"Age <=0.3958580977703697
+Divided By Age
+Gini=0.4129" -> "Age > -1.7346154026574094
+1"
+	"Age > 0.3958580977703697
+0" [color=red]
+	"Fare <=-0.2111029963755875
+Divided By Age
+Gini=0.4127" -> "Age > 0.3958580977703697
+0"
+	"Fare > -0.2111029963755875
+Divided By Fare
+Gini=0.18" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Fare
+Gini=0.4127" -> "Fare > -0.2111029963755875
+Divided By Fare
+Gini=0.18"
+	"Fare <=-0.0365970380912687
+Divided By Fare
+Gini=0.0" [color=blue shape=box]
+	"Fare > -0.2111029963755875
+Divided By Fare
+Gini=0.18" -> "Fare <=-0.0365970380912687
+Divided By Fare
+Gini=0.0"
+	"Fare <=-0.0387713082710172
+0" [color=red]
+	"Fare <=-0.0365970380912687
+Divided By Fare
+Gini=0.0" -> "Fare <=-0.0387713082710172
+0"
+	"Fare > -0.0387713082710172
+1" [color=red]
+	"Fare <=-0.0365970380912687
+Divided By Fare
+Gini=0.0" -> "Fare > -0.0387713082710172
+1"
+	"Fare > -0.0365970380912687
+0" [color=red]
+	"Fare > -0.2111029963755875
+Divided By Fare
+Gini=0.18" -> "Fare > -0.0365970380912687
+0"
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2355" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.299" -> "Sex_male > 0
+Divided By Fare
+Gini=0.2355"
+	"Fare <=-0.1407204211436729
+Divided By Age
+Gini=0.129" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2355" -> "Fare <=-0.1407204211436729
+Divided By Age
+Gini=0.129"
+	"Age <=-1.5477317622690077
+Divided By SibSp
+Gini=0.0" [color=blue shape=box]
+	"Fare <=-0.1407204211436729
+Divided By Age
+Gini=0.129" -> "Age <=-1.5477317622690077
+Divided By SibSp
+Gini=0.0"
+	"SibSp <=0.4811038987780187
+1" [color=red]
+	"Age <=-1.5477317622690077
+Divided By SibSp
+Gini=0.0" -> "SibSp <=0.4811038987780187
+1"
+	"SibSp > 0.4811038987780187
+0" [color=red]
+	"Age <=-1.5477317622690077
+Divided By SibSp
+Gini=0.0" -> "SibSp > 0.4811038987780187
+0"
+	"Age > -1.5477317622690077
+Divided By TicketPrefix_SWPP
+Gini=0.1116" [color=blue shape=box]
+	"Fare <=-0.1407204211436729
+Divided By Age
+Gini=0.129" -> "Age > -1.5477317622690077
+Divided By TicketPrefix_SWPP
+Gini=0.1116"
+	"TicketPrefix_SWPP <=0
+Divided By TicketNumLen
+Gini=0.1108" [color=blue shape=box]
+	"Age > -1.5477317622690077
+Divided By TicketPrefix_SWPP
+Gini=0.1116" -> "TicketPrefix_SWPP <=0
+Divided By TicketNumLen
+Gini=0.1108"
+	"TicketNumLen <=1.7176728854700731
+0" [color=red]
+	"TicketPrefix_SWPP <=0
+Divided By TicketNumLen
+Gini=0.1108" -> "TicketNumLen <=1.7176728854700731
+0"
+	"TicketNumLen > 1.7176728854700731
+0" [color=red]
+	"TicketPrefix_SWPP <=0
+Divided By TicketNumLen
+Gini=0.1108" -> "TicketNumLen > 1.7176728854700731
+0"
+	"TicketPrefix_SWPP > 0
+1" [color=red]
+	"Age > -1.5477317622690077
+Divided By TicketPrefix_SWPP
+Gini=0.1116" -> "TicketPrefix_SWPP > 0
+1"
+	"Fare > -0.1407204211436729
+Divided By SibSp
+Gini=0.3885" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Fare
+Gini=0.2355" -> "Fare > -0.1407204211436729
+Divided By SibSp
+Gini=0.3885"
+	"SibSp <=1.441111526065254
+Divided By Age
+Gini=0.4101" [color=blue shape=box]
+	"Fare > -0.1407204211436729
+Divided By SibSp
+Gini=0.3885" -> "SibSp <=1.441111526065254
+Divided By Age
+Gini=0.4101"
+	"Age <=-0.127416095317155
+Divided By TicketPrefix_Unknown
+Gini=0.2495" [color=blue shape=box]
+	"SibSp <=1.441111526065254
+Divided By Age
+Gini=0.4101" -> "Age <=-0.127416095317155
+Divided By TicketPrefix_Unknown
+Gini=0.2495"
+	"TicketPrefix_Unknown <=0
+0" [color=red]
+	"Age <=-0.127416095317155
+Divided By TicketPrefix_Unknown
+Gini=0.2495" -> "TicketPrefix_Unknown <=0
+0"
+	"TicketPrefix_Unknown > 0
+1" [color=red]
+	"Age <=-0.127416095317155
+Divided By TicketPrefix_Unknown
+Gini=0.2495" -> "TicketPrefix_Unknown > 0
+1"
+	"Age > -0.127416095317155
+Divided By Fare
+Gini=0.3377" [color=blue shape=box]
+	"SibSp <=1.441111526065254
+Divided By Age
+Gini=0.4101" -> "Age > -0.127416095317155
+Divided By Fare
+Gini=0.3377"
+	"Fare <=1.4136411718010338
+0" [color=red]
+	"Age > -0.127416095317155
+Divided By Fare
+Gini=0.3377" -> "Fare <=1.4136411718010338
+0"
+	"Fare > 1.4136411718010338
+1" [color=red]
+	"Age > -0.127416095317155
+Divided By Fare
+Gini=0.3377" -> "Fare > 1.4136411718010338
+1"
+	"SibSp > 1.441111526065254
+0" [color=red]
+	"Fare > -0.1407204211436729
+Divided By SibSp
+Gini=0.3885" -> "SibSp > 1.441111526065254
+0"
+}

@@ -138,6 +138,35 @@ class C45:
         dot = add_nodes_edges(self.tree)
         return dot
 
+    def predict_and_plot(self, X, dot):
+        def add_nodes_edges(X, tree, dot=None, parent_name=None, edge_label=None, feature_name=None):
+
+            if not isinstance(tree, dict):
+                if edge_label is not None:
+                    node_name = f"{feature_name} {edge_label}\n{str(tree)}"
+                else:
+                    node_name = str(tree)
+                dot.node(node_name, color="red", style='filled', fillcolor='yellow')
+            else:
+                if edge_label:
+                    node_name = f"{feature_name} {edge_label}\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                else:
+                    node_name = f"Root\nDivided By {tree['feature']}\nGain-Ratio={round(tree['gain_ratio'], 4)}"
+                dot.node(node_name, color="blue", shape='box',style='filled',fillcolor='yellow')
+
+                if 'left' in tree and X[tree['feature']] <= tree['threshold']:
+                    add_nodes_edges(X, tree['left'], dot=dot, parent_name=node_name,
+                                    edge_label="<=" + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+                if 'right' in tree and X[tree['feature']] > tree['threshold']:
+                    add_nodes_edges(X, tree['right'], dot=dot, parent_name=node_name,
+                                    edge_label="> " + str(tree['threshold']),
+                                    feature_name=tree['feature'])
+            return dot
+
+        dot = add_nodes_edges(X, self.tree, dot)
+        return dot
+
 
 if __name__ == '__main__':
     df = pd.read_csv('../data/iris.csv')
@@ -145,10 +174,16 @@ if __name__ == '__main__':
     model = C45(max_depth=10)
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
+    print(predictions)
     accuracy = np.mean([predictions[i] == y_test.iloc[i] for i in range(len(y_test))])
     print(f"Accuracy: {accuracy:.2f}")
 
     dot = model.plot_tree()
-    dot.render("../pic/C45/C45", format='png')
-    image = Image(filename="../pic/C45/C45.png")
+
+    X_predict = df.iloc[120, :]
+    print(X_predict)
+    dot = model.predict_and_plot(X_predict, dot)
+
+    dot.render("../pic/C45/3C45", format='png')
+    image = Image(filename="../pic/C45/3C45.png")
     display(image)

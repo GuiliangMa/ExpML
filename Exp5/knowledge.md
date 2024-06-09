@@ -2,7 +2,7 @@
 
 ## SVM基本表示形式
 
-SVM线性平面方程可以描述为：$w^Tx+b=0$，假设间隔为$d$
+SVM线性平面方程可以描述为：$\mathbf{w}^T\mathbf{x}+b=0$，假设间隔为$d$
 
 通过一些列等价变化可以将分类的边界变为：
 $$
@@ -238,6 +238,8 @@ $$
 
 ## SMO 解释
 
+### 理论
+
 正如上述软间隔所描述的约束优化表达式
 $$
 \underset{\Lambda}{max}\quad\sum_{i=1}^m\lambda_i-\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^m\lambda_i\lambda_jy_iy_jK(\mathbf{x}_i,\mathbf{x}_j))\\
@@ -265,4 +267,166 @@ s.t. \quad \lambda_iy_i+\lambda_jy_j = -\sum_{k\neq i,j}\lambda_ky_k\\
 0\leq \lambda_i \leq C\\
 0\leq \lambda_j \leq C\\
 $$
-https://yoyoyohamapi.gitbooks.io/mit-ml/content/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/codes/%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%86%B3%E7%AD%96%E8%BE%B9%E7%95%8C.html
+从数学上来看，$\lambda_i,\lambda_j$ 的取值 要落在 0-C取值的正方形中，且要落在对应的一条线段上。
+
+若放缩$\lambda_i$ 的取值边界，则有 $L\leq \lambda_i \leq H$
+
+由此可以求出 $\lambda_i$ 的上下界：
+
+- $y_i \neq y_j$ 时：
+  $$
+  L = max(0,\lambda_i-\lambda_j),\quad H=min(C,C+\lambda_j-\lambda_i)
+  $$
+  
+- $y_i = y_j$ 时：
+  $$
+  L = max(0,C+\lambda_j-\lambda_i),\quad H=min(C,\lambda_j+\lambda_i)
+  $$
+  定义优化函数为：
+  $$
+  \Psi = (\lambda_i+\lambda_j)-[\frac{1}{2}K_{ii}\lambda_i^2+\frac{1}{2}K_{jj}\lambda_j^2+y_iy_jK_{ij}\lambda_i\lambda_j]
+  $$
+  
+
+​	由于$\lambda_i$ 和 $\lambda_j$ 有线性关系，因此可以消去$\lambda_i $，进而令 $\Psi$ 对 $\lambda_j$ 求二阶导，并令二阶导为0可以得到：
+$$
+\lambda_{jnew}(2K_{ij}-K_{ii}-K_{jj}) = \lambda_{jold}(2K_{ij}-K_{ii}-K_{jj})-y_j(E_i-E_j) \\
+E_i = f(\mathbf{x}_i) -y_i
+$$
+令：$\eta = 2K_{ij} - K_{ii} - K_{jj}$
+
+因此：
+$$
+\lambda_{jnew} = \lambda_{jold} - \frac{y_j(E_i-E_j)}{\eta}
+$$
+但是还需要考虑上下界截断：
+$$
+\lambda_{jnewclipped} = 
+\left\{
+\begin{matrix}
+H,\quad if \quad \lambda_{jnew} \geq H\\
+\lambda_{jnew}, \quad if \quad L<\lambda_{jnew}<H \\
+L,\quad if \quad \lambda_{jnew} \leq L
+\end{matrix}
+\right.
+$$
+从而得到 $\lambda_i$ 的更新：
+$$
+\lambda_{inew} = \lambda_{iold}+y_iy_j(\lambda_{jold}-\lambda_{jnewclipped})
+$$
+令：
+$$
+b_1 = b_{old}-E_i-y_iK_{ii}(\lambda_{inew}-\lambda_{iold})-y_jK_{ij}(\lambda_{jnewclipped}-\lambda_{jold})\\
+b_2 = b_{old}-E_j-y_iK_{ij}(\lambda_{inew}-\lambda_{old})-y_jK_{jj}(\lambda_{jnewclipped}-\lambda_{jold})
+$$
+则 $b$ 的更新为：
+$$
+b_{new} = \left\{
+\begin{matrix}
+b_1,\quad if\quad 0<\lambda_{inew}<C\\
+b_2,\quad if \quad 0<\lambda_{jnewclipped}<C\\
+\frac{b_1+b_2}{2},otherwise
+\end{matrix}
+\right.
+$$
+
+### 启发式选择
+
+如果两个拉格朗日乘子其中之一违背了 KKT 条件，此时，每一次乘子对的选择，都能使得优化目标函数减小。
+
+若 $\lambda_i =0 $，可知样本 $\mathbf{x}_i$ 不会对模型产生影响
+
+若 $\lambda_i = C$，样本 $\mathbf{x}_i$ 不会是支持向量
+
+若 $0<\lambda_i<C$，则$\lambda_i$ 没有落在边界上，当下式满足时，$\lambda_i$ 会违反KKT条件：
+$$
+\lambda_i<C \quad and \quad y_if(\mathbf{x}_i) -1 <0\\
+\lambda_i>0 \quad and \quad y_if(\mathbf{x}_i) -1 >0\\
+$$
+由于上式过于严苛，可以考虑设置一个容忍区间 $[-\tau,\tau]$，并考虑令：
+$$
+R_i = y_iE_i= y_i(f(\mathbf{x}_i)-y_i) = y_if(\mathbf{x}_i)-1
+$$
+可以将违反KKT条件表达式写为：
+$$
+\lambda_i<C \quad and \quad R_i<-\tau\\
+\lambda_i>0 \quad and \quad R_i >\tau
+$$
+则启发式选择$\lambda_i,\lambda_j$ 可以看作两层循环：
+
+外层循环中，如果当前没有 $\lambda$ 对的变化，意味着所有的 $\lambda_i$ 都遵循了KKT条件，需要在整个样本集上进行迭代。否则，只需要选择在处在边界内 $0<\lambda_i<C$、并且违反了KKT条件的$\lambda_i$。
+
+内层循环中，选出使得 $E_i-E_j$ 达到最大的 $\lambda_j$
+
+
+
+
+
+## 特殊处理：
+
+这两段代码段实现了SMO算法的两个不同版本，时间差异巨大的原因在于它们采用了不同的启发式方法来选择需要优化的拉格朗日乘子对，并且处理方式有所不同。
+
+### 第一段循环：
+
+```python
+while num_changed > 0 or examine_all:
+    num_changed = 0
+    if examine_all:
+        for i in range(n_samples):
+            _, j, E_i, E_j = choose_alpha_pair(i)
+            if j is not None:
+                if update_alpha_pair(i, j, E_i, E_j):
+                    num_changed += 1
+    else:
+        for i in range(n_samples):
+            if 0 < self.Lambda[i] < C:
+                _, j, E_i, E_j = choose_alpha_pair(i)
+                if j is not None:
+                    if update_alpha_pair(i, j, E_i, E_j):
+                        num_changed += 1
+    examine_all = (examine_all == False)
+```
+
+#### 特点：
+
+1. **检查所有样本（examine_all = True）**：在这种情况下，所有样本都会被检查，时间复杂度较高，因为每个样本都需要进行一次拉格朗日乘子的选择和更新。
+2. **只检查非边界样本（examine_all = False）**：在这种情况下，只检查那些拉格朗日乘子在（0, C）范围内的样本，减少了需要检查的样本数。
+
+#### 时间差异原因：
+
+- 当`examine_all`为True时，每次迭代都会遍历所有样本，消耗大量时间。
+- 当`examine_all`为False时，只遍历非边界样本，减少了遍历次数，但如果条件不满足，需要反复切换`examine_all`状态，导致额外的迭代和检查。
+
+### 第二段循环：
+
+```python
+iteration = 0
+while iteration < max_iter:
+    num_changed = 0
+    for i in range(n_samples):
+        E_i = compute_error(i)
+        if (y[i] * E_i < -tolerance and self.Lambda[i] < C) or (y[i] * E_i > tolerance and self.Lambda[i] > 0):
+            j = choose_alpha_pair(i, E_i)
+            if update_alpha_pair(i, j):
+                num_changed += 1
+    if num_changed == 0:
+        break
+    iteration += 1
+```
+
+#### 特点：
+
+1. **固定迭代次数（max_iter）**：每次迭代遍历所有样本，但通过`max_iter`限制最大迭代次数。
+2. **直接选择对违反KKT条件的样本对进行优化**：减少不必要的迭代次数。
+
+#### 时间差异原因：
+
+- 每次迭代都遍历所有样本，但直接对违反KKT条件的样本对进行优化，这样在每次迭代中更高效。
+- 在更新拉格朗日乘子对时，如果没有发生变化（num_changed == 0），则直接退出循环，减少了不必要的迭代次数。
+
+### 总结：
+
+- **第一段循环**：采用检查所有样本和非边界样本交替进行的方法，导致在每次迭代中都可能进行大量无效的检查，从而影响性能。
+- **第二段循环**：每次迭代都遍历所有样本，但只对违反KKT条件的样本对进行优化，同时通过设置最大迭代次数限制总的迭代次数，优化了算法的效率。
+
+因此，第二段代码在时间复杂度和效率上更优，因为它减少了不必要的检查和迭代次数，更快地收敛到解决方案。

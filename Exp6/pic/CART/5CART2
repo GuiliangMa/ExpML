@@ -1,0 +1,227 @@
+digraph {
+	"Root
+Divided By Sex_male
+Gini=0.2798" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4164" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.2798" -> "Sex_male <=0
+Divided By Pclass_3
+Gini=0.4164"
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.2876" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4164" -> "Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.2876"
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.098" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.2876" -> "TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.098"
+	"Fare <=-0.2373546513547208
+Divided By TicketPrefix_CA
+Gini=0.2143" [color=blue shape=box]
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.098" -> "Fare <=-0.2373546513547208
+Divided By TicketPrefix_CA
+Gini=0.2143"
+	"TicketPrefix_CA <=0
+0" [color=red]
+	"Fare <=-0.2373546513547208
+Divided By TicketPrefix_CA
+Gini=0.2143" -> "TicketPrefix_CA <=0
+0"
+	"TicketPrefix_CA > 0
+1" [color=red]
+	"Fare <=-0.2373546513547208
+Divided By TicketPrefix_CA
+Gini=0.2143" -> "TicketPrefix_CA > 0
+1"
+	"Fare > -0.2373546513547208
+1" [color=red]
+	"TicketNumLen <=-0.3413324323690535
+Divided By Fare
+Gini=0.098" -> "Fare > -0.2373546513547208
+1"
+	"TicketNumLen > -0.3413324323690535
+Divided By Fare
+Gini=0.3743" [color=blue shape=box]
+	"Pclass_3 <=0
+Divided By TicketNumLen
+Gini=0.2876" -> "TicketNumLen > -0.3413324323690535
+Divided By Fare
+Gini=0.3743"
+	"Fare <=1.0285537644100076
+1" [color=red]
+	"TicketNumLen > -0.3413324323690535
+Divided By Fare
+Gini=0.3743" -> "Fare <=1.0285537644100076
+1"
+	"Fare > 1.0285537644100076
+0" [color=red]
+	"TicketNumLen > -0.3413324323690535
+Divided By Fare
+Gini=0.3743" -> "Fare > 1.0285537644100076
+0"
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.3508" [color=blue shape=box]
+	"Sex_male <=0
+Divided By Pclass_3
+Gini=0.4164" -> "Pclass_3 > 0
+Divided By Age
+Gini=0.3508"
+	"Age <=-1.8467455868904503
+Divided By Age
+Gini=0.1333" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.3508" -> "Age <=-1.8467455868904503
+Divided By Age
+Gini=0.1333"
+	"Age <=-2.0710059553565325
+1" [color=red]
+	"Age <=-1.8467455868904503
+Divided By Age
+Gini=0.1333" -> "Age <=-2.0710059553565325
+1"
+	"Age > -2.0710059553565325
+1" [color=red]
+	"Age <=-1.8467455868904503
+Divided By Age
+Gini=0.1333" -> "Age > -2.0710059553565325
+1"
+	"Age > -1.8467455868904503
+Divided By Age
+Gini=0.313" [color=blue shape=box]
+	"Pclass_3 > 0
+Divided By Age
+Gini=0.3508" -> "Age > -1.8467455868904503
+Divided By Age
+Gini=0.313"
+	"Age <=1.3676530277900585
+0" [color=red]
+	"Age > -1.8467455868904503
+Divided By Age
+Gini=0.313" -> "Age <=1.3676530277900585
+0"
+	"Age > 1.3676530277900585
+1" [color=red]
+	"Age > -1.8467455868904503
+Divided By Age
+Gini=0.313" -> "Age > 1.3676530277900585
+1"
+	"Sex_male > 0
+Divided By Cabin_E
+Gini=0.2121" [color=blue shape=box]
+	"Root
+Divided By Sex_male
+Gini=0.2798" -> "Sex_male > 0
+Divided By Cabin_E
+Gini=0.2121"
+	"Cabin_E <=0
+Divided By Fare
+Gini=0.2015" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Cabin_E
+Gini=0.2121" -> "Cabin_E <=0
+Divided By Fare
+Gini=0.2015"
+	"Fare <=4.439742090860001
+Divided By Age
+Gini=0.1981" [color=blue shape=box]
+	"Cabin_E <=0
+Divided By Fare
+Gini=0.2015" -> "Fare <=4.439742090860001
+Divided By Age
+Gini=0.1981"
+	"Age <=-1.8841223149681308
+Divided By SibSp
+Gini=0.0" [color=blue shape=box]
+	"Fare <=4.439742090860001
+Divided By Age
+Gini=0.1981" -> "Age <=-1.8841223149681308
+Divided By SibSp
+Gini=0.0"
+	"SibSp <=0.4811038987780187
+1" [color=red]
+	"Age <=-1.8841223149681308
+Divided By SibSp
+Gini=0.0" -> "SibSp <=0.4811038987780187
+1"
+	"SibSp > 0.4811038987780187
+0" [color=red]
+	"Age <=-1.8841223149681308
+Divided By SibSp
+Gini=0.0" -> "SibSp > 0.4811038987780187
+0"
+	"Age > -1.8841223149681308
+Divided By TicketPrefix_SWPP
+Gini=0.1888" [color=blue shape=box]
+	"Fare <=4.439742090860001
+Divided By Age
+Gini=0.1981" -> "Age > -1.8841223149681308
+Divided By TicketPrefix_SWPP
+Gini=0.1888"
+	"TicketPrefix_SWPP <=0
+0" [color=red]
+	"Age > -1.8841223149681308
+Divided By TicketPrefix_SWPP
+Gini=0.1888" -> "TicketPrefix_SWPP <=0
+0"
+	"TicketPrefix_SWPP > 0
+1" [color=red]
+	"Age > -1.8841223149681308
+Divided By TicketPrefix_SWPP
+Gini=0.1888" -> "TicketPrefix_SWPP > 0
+1"
+	"Fare > 4.439742090860001
+1" [color=red]
+	"Cabin_E <=0
+Divided By Fare
+Gini=0.2015" -> "Fare > 4.439742090860001
+1"
+	"Cabin_E > 0
+Divided By Fare
+Gini=0.1455" [color=blue shape=box]
+	"Sex_male > 0
+Divided By Cabin_E
+Gini=0.2121" -> "Cabin_E > 0
+Divided By Fare
+Gini=0.1455"
+	"Fare <=-0.1300906558204576
+1" [color=red]
+	"Cabin_E > 0
+Divided By Fare
+Gini=0.1455" -> "Fare <=-0.1300906558204576
+1"
+	"Fare > -0.1300906558204576
+Divided By Age
+Gini=0.0" [color=blue shape=box]
+	"Cabin_E > 0
+Divided By Fare
+Gini=0.1455" -> "Fare > -0.1300906558204576
+Divided By Age
+Gini=0.0"
+	"Age <=-0.351676463783237
+1" [color=red]
+	"Fare > -0.1300906558204576
+Divided By Age
+Gini=0.0" -> "Age <=-0.351676463783237
+1"
+	"Age > -0.351676463783237
+0" [color=red]
+	"Fare > -0.1300906558204576
+Divided By Age
+Gini=0.0" -> "Age > -0.351676463783237
+0"
+}
